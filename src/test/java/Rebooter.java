@@ -50,5 +50,7 @@ public class Rebooter {
         $(By.className("submitBtn")).click();
 
         Selenide.sleep(10000);
+
+        Selenide.switchTo().alert().accept();
     }
 }
