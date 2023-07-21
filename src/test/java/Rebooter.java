@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 
+import static com.codeborne.selenide.Condition.interactable;
 import static com.codeborne.selenide.Selenide.$;
 import static com.codeborne.selenide.Selenide.open;
 
@@ -47,12 +48,14 @@ public class Rebooter {
         }
 
         // Click the button to restart the router
-        $(By.className("submitBtn")).click();
+        $(By.className("submitBtn")).shouldBe(interactable).click();
 
         // Accept the javascript prompt alert
         Selenide.switchTo().alert().accept();
 
         // Sleep for 10s before exiting to ensure the request had time to go through
         Selenide.sleep(10000);
+
+        Selenide.closeWebDriver();
     }
 }
