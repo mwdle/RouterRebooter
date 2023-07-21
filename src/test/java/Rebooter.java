@@ -49,8 +49,10 @@ public class Rebooter {
         // Click the button to restart the router
         $(By.className("submitBtn")).click();
 
-        Selenide.sleep(10000);
-
+        // Accept the javascript prompt alert
         Selenide.switchTo().alert().accept();
+
+        // Sleep for 10s before exiting to ensure the request had time to go through
+        Selenide.sleep(10000);
     }
 }
