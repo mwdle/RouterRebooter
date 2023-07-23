@@ -5,12 +5,9 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.chrome.ChromeOptions;
 
 import java.io.BufferedReader;
-import java.io.FileInputStream;
-import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
 import static com.codeborne.selenide.Condition.interactable;
@@ -21,16 +18,9 @@ public class RouterRebooter {
 
     public static void main(String[] args) {
 
-        Properties properties = new Properties();
-        try (FileInputStream input = new FileInputStream("/home/mwdle/Desktop/JavaProjects/RouterRebooter/src/main/resources/secrets.properties")) {
-            properties.load(input);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
         // Grab username and password secrets from the secret file.
-        String username = properties.getProperty("routerUsername");
-        String password = properties.getProperty("routerPassword");
+        String username = System.getenv("routerUsername");
+        String password = System.getenv("routerPassword");
 
         ChromeOptions chromeOptions = new ChromeOptions();
         chromeOptions.addArguments("--incognito");
@@ -127,7 +117,7 @@ public class RouterRebooter {
         timer.stop();
         timer.reset();
 
-        $(By.className("password-text")).shouldBe(interactable).setValue(properties.getProperty("tplinkPassword"));
+        $(By.className("password-text")).shouldBe(interactable).setValue(System.getenv("tplinkPassword"));
         $(By.id("login-btn")).shouldBe(interactable).click();
 
         timer.start();
