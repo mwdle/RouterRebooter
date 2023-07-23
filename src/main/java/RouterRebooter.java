@@ -2,7 +2,6 @@ import com.codeborne.selenide.Configuration;
 import com.codeborne.selenide.Selenide;
 import org.apache.commons.lang3.time.StopWatch;
 import org.openqa.selenium.By;
-import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 
 import java.io.BufferedReader;
@@ -75,7 +74,7 @@ public class RouterRebooter {
         }
 
         /*
-          The following for loop finds the IP address of the gateway for the TP-Link extender before restarting the router, so that the extender can also be restarted afterwards.
+          The following for loop finds the IP address of the gateway for the TP-Link extender before restarting the router, so that the extender can also be restarted after.
          */
         String tpLinkIP = "";
         for (int i = 2; i < 254; i++) {
