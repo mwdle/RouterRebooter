@@ -1,9 +1,11 @@
 import com.codeborne.selenide.Selenide;
 import org.openqa.selenium.By;
 
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
+import java.net.HttpURLConnection;
+import java.net.InetAddress;
+import java.net.Socket;
+import java.net.URL;
 import java.util.Properties;
 
 import static com.codeborne.selenide.Condition.interactable;
@@ -12,7 +14,7 @@ import static com.codeborne.selenide.Selenide.open;
 
 public class Rebooter {
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
 
         Properties properties = new Properties();
         try (InputStream input = new FileInputStream("/home/mwdle/Desktop/JavaProjects/RouterRebooter/src/test/java/secrets.properties")) {
@@ -48,13 +50,52 @@ public class Rebooter {
         }
 
         // Click the button to restart the router
-        $(By.className("submitBtn")).shouldBe(interactable).click();
+        //$(By.className("submitBtn")).shouldBe(interactable).click();
 
-        // Accept the javascript prompt alert
-        Selenide.switchTo().alert().accept();
+        //// Accept the javascript prompt alert
+        //Selenide.switchTo().alert().accept();
 
-        // Sleep for 10s before exiting to ensure the request had time to go through
-        Selenide.sleep(10000);
+        //// Sleep for 10s before exiting to ensure the request had time to go through
+        //Selenide.sleep(10000);
+
+        Selenide.closeWebDriver();
+
+        String tpLinkIP = "";
+
+        for (int i = 2; i < 254; i++) {
+            String address = "192.168.0." + i;
+            try {
+                URL url = new URL("http://" + address);
+                // Open a connection to the URL
+                HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+                connection.setRequestMethod("GET");
+                connection.setConnectTimeout(1000);
+                connection.setReadTimeout(5000);
+                // Get the HTTP response code
+                int responseCode = connection.getResponseCode();
+                // Check if the website is reachable (HTTP 2xx response code)
+                if (responseCode >= 200 && responseCode < 300) {
+                    StringBuilder responseContent = new StringBuilder();
+                    BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+                    String line;
+                    while ((line = in.readLine()) != null) {
+                        responseContent.append(line);
+                    }
+                    if (responseContent.toString().contains("tp-link")) {
+                        tpLinkIP = address;
+                        connection.disconnect();
+                        break;
+                    }
+                }
+                // Close the connection
+                connection.disconnect();
+            } catch (Exception ignored) {
+            }
+        }
+
+        if (!tpLinkIP.equals("")) {
+            open("http://" + tpLinkIP + "/");
+        }
 
         Selenide.closeWebDriver();
     }
