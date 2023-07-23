@@ -22,7 +22,7 @@ public class RouterRebooter {
     public static void main(String[] args) {
 
         Properties properties = new Properties();
-        try (FileInputStream input = new FileInputStream("/src/main/resources/secrets.properties")) {
+        try (FileInputStream input = new FileInputStream("/home/mwdle/Desktop/JavaProjects/RouterRebooter/src/main/resources/secrets.properties")) {
             properties.load(input);
         } catch (IOException e) {
             e.printStackTrace();
@@ -44,13 +44,8 @@ public class RouterRebooter {
             open("http://192.168.0.1/?util_restart");
         }
 
-        Selenide.sleep(2000);
-
-        Selenide.refresh();
-
         StopWatch timer = new StopWatch();
         timer.start();
-
         // Wait until the login screen appears to do anything
         while (!$(By.linkText("Login")).exists()) {
             Selenide.sleep(200);
