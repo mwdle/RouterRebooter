@@ -41,3 +41,4 @@ build/
 *.properties
 
 vcs.xml
+misc.xml
