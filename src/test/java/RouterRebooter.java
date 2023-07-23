@@ -1,26 +1,25 @@
 import com.codeborne.selenide.Selenide;
-import com.codeborne.selenide.Stopwatch;
+import dev.failsafe.internal.util.Assert;
 import org.apache.commons.lang3.time.StopWatch;
 import org.openqa.selenium.By;
 
 import java.io.*;
 import java.net.HttpURLConnection;
-import java.net.InetAddress;
-import java.net.Socket;
 import java.net.URL;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
 import static com.codeborne.selenide.Condition.interactable;
 import static com.codeborne.selenide.Selenide.$;
+
 import static com.codeborne.selenide.Selenide.open;
 
-public class Rebooter {
+public class RouterRebooter {
 
-    public static void main(String[] args) throws Exception {
+    public static void main(String[] args) {
 
         Properties properties = new Properties();
-        try (InputStream input = new FileInputStream("/home/mwdle/Desktop/JavaProjects/RouterRebooter/src/test/java/secrets.properties")) {
+        try (FileInputStream input = new FileInputStream("/home/mwdle/Desktop/JavaProjects/RouterRebooter/src/test/java/secrets.properties")) {
             properties.load(input);
         } catch (IOException e) {
             e.printStackTrace();
@@ -41,7 +40,7 @@ public class Rebooter {
         while (!$(By.linkText("Login")).exists()) {
             Selenide.sleep(200);
             if (timer.getTime(TimeUnit.SECONDS) > 60)
-                throw new Exception("Timed out loading router login page");
+                break;
         }
         timer.stop();
         timer.reset();
@@ -59,8 +58,8 @@ public class Rebooter {
             $(By.className("ui-button")).click();
         }
 
-        /**
-         * The following for loop finds the IP address of the gateway for the TP-Link extender before restarting the router, so that the extender can also be restarted afterwards.
+        /*
+          The following for loop finds the IP address of the gateway for the TP-Link extender before restarting the router, so that the extender can also be restarted afterwards.
          */
         String tpLinkIP = "";
         for (int i = 2; i < 254; i++) {
@@ -113,7 +112,7 @@ public class Rebooter {
         while (!$(By.className("password-text")).exists()) {
             Selenide.sleep(200);
             if (timer.getTime(TimeUnit.SECONDS) > 30)
-                throw new Exception("Timed out loading router login page");
+                break;
         }
         timer.stop();
         timer.reset();
@@ -125,7 +124,7 @@ public class Rebooter {
         while (!$(By.id("map_router")).exists()) {
             Selenide.sleep(200);
             if (timer.getTime(TimeUnit.SECONDS) > 10)
-                throw new Exception("Timed out loading tplink management page");
+                break;
         }
         timer.stop();
         timer.reset();
