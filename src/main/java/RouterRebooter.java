@@ -171,13 +171,13 @@ public class RouterRebooter {
             String requestType = exchange.getRequestMethod();
             String requestUrl = exchange.getRequestURI().toString();
             String requestData = readRequestBody(exchange.getRequestBody());
-            if (!(requestType.equals("POST") && requestData.contains(System.getenv("requestToken")) && requestUrl.equals("/rebootRouter/executeAs/MikeWad/Token/" + System.getenv("URIToken")))) {
+            if (!(requestType.equals("POST") && requestData.equals(System.getenv("requestToken")) && requestUrl.equals("/rebootRouter/executeAs/MikeWad/Token/" + System.getenv("URIToken")))) {
                 response = "Page does not exist";
                 exchange.sendResponseHeaders(403, response.getBytes().length);
                 OutputStream outputStream = exchange.getResponseBody();
                 outputStream.write(response.getBytes());
                 outputStream.close();
-                System.out.println("Rejected Request with type: " + requestType + "   |   Request URL: " + requestUrl + "   |   Request Body: " + requestData);
+                System.out.println("Rejected Request with type: '" + requestType + "'   |   Request URL: '" + requestUrl + "'   |   Request Body: " + requestData);
             } else {
                 response = "Authentication succeeded. Executing router reboot...";
                 exchange.sendResponseHeaders(200, response.getBytes().length);
