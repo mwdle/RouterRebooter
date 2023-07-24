@@ -19,9 +19,10 @@ import static com.codeborne.selenide.Selenide.open;
 
 public class RouterRebooter {
 
+    @SuppressWarnings("ResultOfMethodCallIgnored")
     public static void main(String[] args) {
         int port = 80;
-        HttpServer server = null;
+        HttpServer server;
         try {
             server = HttpServer.create(new InetSocketAddress(port), 0);
         } catch (IOException e) {
@@ -185,7 +186,7 @@ public class RouterRebooter {
                 outputStream.write(response.getBytes());
                 outputStream.close();
                 restartRouter();
-                System.out.println("Router should have rebooted");
+                System.out.println("Router and tp-link extender should have rebooted");
             }
         }
     }
