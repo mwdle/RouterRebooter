@@ -177,6 +177,7 @@ public class RouterRebooter {
                 OutputStream outputStream = exchange.getResponseBody();
                 outputStream.write(response.getBytes());
                 outputStream.close();
+                System.out.println("Rejected Request with type: " + requestType + "   |   Request URL: " + requestUrl + "   |   Request Body: " + requestData);
             } else {
                 response = "Authentication succeeded. Executing router reboot...";
                 exchange.sendResponseHeaders(200, response.getBytes().length);
@@ -184,7 +185,7 @@ public class RouterRebooter {
                 outputStream.write(response.getBytes());
                 outputStream.close();
                 restartRouter();
-                System.out.println("router would've restarted just now");
+                System.out.println("Router should have rebooted");
             }
         }
     }
