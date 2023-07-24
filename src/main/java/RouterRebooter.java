@@ -77,7 +77,7 @@ public class RouterRebooter {
         $(By.id("Password")).setValue(password);
         $(By.className("submitBtn")).click();
 
-            Selenide.sleep(2000);
+        Selenide.sleep(2000);
 
         // Dismiss the retarded bullshit ads that popup upon login
         if ($(By.id("doNotShow")).exists()) {
@@ -119,7 +119,7 @@ public class RouterRebooter {
             } catch (Exception ignored) {}
         }
 
-        //         Click the button to restart the router
+        // Click the button to restart the router
         $(By.className("submitBtn")).shouldBe(interactable).click();
 
         // Accept the javascript prompt alert
@@ -166,7 +166,6 @@ public class RouterRebooter {
     }
 
     private static class MyHandler implements HttpHandler {
-
         public ConcurrentHashMap<String, Integer> requestCounts = new ConcurrentHashMap<>();
         public ConcurrentHashMap<String, Long> requestTimestamps = new ConcurrentHashMap<>();
 
@@ -209,7 +208,7 @@ public class RouterRebooter {
             if ((requestType.equals("POST") && requestData.equals(System.getenv("requestToken")) && requestUrl.equals(System.getenv("urlPath")))) {
                 exchange.sendResponseHeaders(200, -1);
                 exchange.close();
-                System.out.println("Obliged Request with type: '" + requestType + "'   |   Request URL: '" + requestUrl + "'   |   Request Body: " + requestData + "   |   From: " + exchange.getRemoteAddress());
+                System.out.println("Obliged request with type: '" + requestType + "'   |   Request URL: '" + requestUrl + "'   |   Request Body: " + requestData + "   |   From: " + exchange.getRemoteAddress());
                 try {
                     restartRouter();
                 } catch (Exception e) {
@@ -218,7 +217,7 @@ public class RouterRebooter {
             } else {
                 exchange.sendResponseHeaders(403, -1);
                 exchange.close();
-                System.out.println("Rejected Request with type: '" + requestType + "'   |   Request URL: '" + requestUrl + "'   |   Request Body: " + requestData + "   |   From: " + exchange.getRemoteAddress());
+                System.out.println("Rejected request with type: '" + requestType + "'   |   Request URL: '" + requestUrl + "'   |   Request Body: " + requestData + "   |   From: " + exchange.getRemoteAddress());
             }
 
         }
