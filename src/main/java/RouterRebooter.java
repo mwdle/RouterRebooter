@@ -21,7 +21,7 @@ public class RouterRebooter {
 
     @SuppressWarnings("ResultOfMethodCallIgnored")
     public static void main(String[] args) {
-        int port = 80;
+        int port = 59783;
         HttpServer server;
         try {
             server = HttpServer.create(new InetSocketAddress(port), 0);
@@ -172,7 +172,7 @@ public class RouterRebooter {
             String requestType = exchange.getRequestMethod();
             String requestUrl = exchange.getRequestURI().toString();
             String requestData = readRequestBody(exchange.getRequestBody());
-            if (!(requestType.equals("POST") && requestData.equals(System.getenv("requestToken")) && requestUrl.equals("/rebootRouter/executeAs/MikeWad/Token/" + System.getenv("URIToken")))) {
+            if (!((requestType.equals("POST") && requestData.equals(System.getenv("requestToken")) && requestUrl.equals("/rebootRouter/executeAs/MikeWad/Token/" + System.getenv("URIToken"))))) {
                 response = "Page does not exist";
                 exchange.sendResponseHeaders(403, response.getBytes().length);
                 OutputStream outputStream = exchange.getResponseBody();
