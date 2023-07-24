@@ -36,7 +36,6 @@ public class RouterRebooter {
             System.in.read();
         }
         catch (Exception ignored) {}
-
     }
 
     private static void restartRouter() {
@@ -172,7 +171,7 @@ public class RouterRebooter {
             String requestType = exchange.getRequestMethod();
             String requestUrl = exchange.getRequestURI().toString();
             String requestData = readRequestBody(exchange.getRequestBody());
-            if (!(requestType.equals("POST") && !requestData.equals(System.getenv("requestToken")) && requestUrl.equals("/rebootRouter/executeAs/MikeWad/Token/" + System.getenv("URIToken")))) {
+            if (!(requestType.equals("POST") && requestData.equals(System.getenv("requestToken")) && requestUrl.equals("/rebootRouter/executeAs/MikeWad/Token/" + System.getenv("URIToken")))) {
                 response = "Page does not exist";
                 exchange.sendResponseHeaders(403, response.getBytes().length);
                 OutputStream outputStream = exchange.getResponseBody();
@@ -184,7 +183,7 @@ public class RouterRebooter {
                 OutputStream outputStream = exchange.getResponseBody();
                 outputStream.write(response.getBytes());
                 outputStream.close();
-                //restartRouter();
+                restartRouter();
                 System.out.println("router would've restarted just now");
             }
         }
