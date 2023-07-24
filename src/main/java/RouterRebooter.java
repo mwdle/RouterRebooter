@@ -1,12 +1,15 @@
 import com.codeborne.selenide.Configuration;
 import com.codeborne.selenide.Selenide;
+import com.sun.net.httpserver.HttpExchange;
+import com.sun.net.httpserver.HttpHandler;
+import com.sun.net.httpserver.HttpServer;
 import org.apache.commons.lang3.time.StopWatch;
 import org.openqa.selenium.By;
 import org.openqa.selenium.chrome.ChromeOptions;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.net.HttpURLConnection;
+import java.net.InetSocketAddress;
 import java.net.URL;
 import java.util.concurrent.TimeUnit;
 
@@ -17,14 +20,36 @@ import static com.codeborne.selenide.Selenide.open;
 public class RouterRebooter {
 
     public static void main(String[] args) {
+        int port = 80;
+        HttpServer server = null;
+        try {
+            server = HttpServer.create(new InetSocketAddress(port), 0);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        server.createContext("/", new MyHandler());
+        server.setExecutor(null);
+        server.start();
+        System.out.println("Server started on port " + port);
+        try {
+            System.out.println("Press Enter to stop the server.");
+            System.in.read();
+        }
+        catch (Exception ignored) {}
 
+    }
+
+    private static void restartRouter() {
         // Grab username and password secrets from the secret file.
         String username = System.getenv("routerUsername");
         String password = System.getenv("routerPassword");
 
         ChromeOptions chromeOptions = new ChromeOptions();
         chromeOptions.addArguments("--incognito");
-        // Set the Chrome options in Selenide Configuration
+        chromeOptions.addArguments("--headless");
+        chromeOptions.addArguments("--no-sandbox");
+        chromeOptions.addArguments("--disable-gpu");
+        chromeOptions.addArguments("--disable-web-security");
         Configuration.browserCapabilities = chromeOptions;
 
         try {
@@ -89,11 +114,12 @@ public class RouterRebooter {
                 }
                 // Close the connection
                 connection.disconnect();
-            } catch (Exception ignored) {
+            } catch (Exception e) {
+                e.printStackTrace();
             }
         }
 
-//         Click the button to restart the router
+        //         Click the button to restart the router
         $(By.className("submitBtn")).shouldBe(interactable).click();
 
         // Accept the javascript prompt alert
@@ -136,5 +162,40 @@ public class RouterRebooter {
         // Sleep for 5 seconds before closing the webdriver and ending the script.
         Selenide.sleep(5000);
         Selenide.closeWebDriver();
+        System.out.println("Script completed successfully");
+    }
+
+    private static class MyHandler implements HttpHandler {
+        @Override
+        public void handle(HttpExchange exchange) throws IOException {
+            String response;
+            String requestType = exchange.getRequestMethod();
+            String requestUrl = exchange.getRequestURI().toString();
+            String requestData = readRequestBody(exchange.getRequestBody());
+            if (!(requestType.equals("POST") && !requestData.equals(System.getenv("requestToken")) && requestUrl.equals("/rebootRouter/executeAs/MikeWad/Token/" + System.getenv("URIToken")))) {
+                response = "Page does not exist";
+                exchange.sendResponseHeaders(403, response.getBytes().length);
+                OutputStream outputStream = exchange.getResponseBody();
+                outputStream.write(response.getBytes());
+                outputStream.close();
+            } else {
+                response = "Authentication succeeded. Executing router reboot...";
+                exchange.sendResponseHeaders(200, response.getBytes().length);
+                OutputStream outputStream = exchange.getResponseBody();
+                outputStream.write(response.getBytes());
+                outputStream.close();
+                //restartRouter();
+                System.out.println("router would've restarted just now");
+            }
+        }
+    }
+    private static String readRequestBody(InputStream inputStream) throws IOException {
+        StringBuilder requestData = new StringBuilder();
+        byte[] buffer = new byte[1024];
+        int bytesRead;
+        while ((bytesRead = inputStream.read(buffer)) != -1) {
+            requestData.append(new String(buffer, 0, bytesRead));
+        }
+        return requestData.toString();
     }
 }
