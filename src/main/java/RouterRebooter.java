@@ -7,10 +7,14 @@ import org.apache.commons.lang3.time.StopWatch;
 import org.openqa.selenium.By;
 import org.openqa.selenium.chrome.ChromeOptions;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.InetSocketAddress;
 import java.net.URL;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
 import static com.codeborne.selenide.Condition.interactable;
@@ -19,9 +23,8 @@ import static com.codeborne.selenide.Selenide.open;
 
 public class RouterRebooter {
 
-    @SuppressWarnings("ResultOfMethodCallIgnored")
     public static void main(String[] args) {
-        int port = 80;
+        int port = 59782;
         HttpServer server;
         try {
             server = HttpServer.create(new InetSocketAddress(port), 0);
@@ -31,9 +34,8 @@ public class RouterRebooter {
         server.createContext("/", new MyHandler());
         server.setExecutor(null);
         server.start();
-        System.out.println("Server started on port " + port);
+        System.out.println("Server started on container port " + port);
         try {
-            System.out.println("Press Enter to stop the server.");
             System.in.read();
         }
         catch (Exception ignored) {}
@@ -114,9 +116,7 @@ public class RouterRebooter {
                 }
                 // Close the connection
                 connection.disconnect();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+            } catch (Exception ignored) {}
         }
 
         //         Click the button to restart the router
@@ -162,41 +162,74 @@ public class RouterRebooter {
         // Sleep for 5 seconds before closing the webdriver and ending the script.
         Selenide.sleep(5000);
         Selenide.closeWebDriver();
-        System.out.println("Script completed successfully");
+        System.out.println("Home access points should have rebooted successfully.");
     }
 
     private static class MyHandler implements HttpHandler {
+
+        public ConcurrentHashMap<String, Integer> requestCounts = new ConcurrentHashMap<>();
+        public ConcurrentHashMap<String, Long> requestTimestamps = new ConcurrentHashMap<>();
+
         @Override
         public void handle(HttpExchange exchange) throws IOException {
-            String response;
-            String requestType = exchange.getRequestMethod();
-            String requestUrl = exchange.getRequestURI().toString();
-            String requestData = readRequestBody(exchange.getRequestBody());
-            if ((requestType.equals("POST") && requestData.equals(System.getenv("requestToken")) && requestUrl.equals("/rebootRouter/executeAs/MikeWad/Token/" + System.getenv("URIToken")))) {
-                response = "Authentication succeeded. Executing router reboot...";
-                exchange.sendResponseHeaders(200, response.getBytes().length);
-                OutputStream outputStream = exchange.getResponseBody();
-                outputStream.write(response.getBytes());
-                outputStream.close();
-                restartRouter();
-                System.out.println("Router and tp-link extender should have rebooted");
+
+            String clientIP = exchange.getRemoteAddress().getAddress().toString();
+
+            if (!requestCounts.containsKey(clientIP)) {
+                requestCounts.put(clientIP, 1);
+                requestTimestamps.put(clientIP, System.currentTimeMillis());
             } else {
-                response = "Page does not exist";
-                exchange.sendResponseHeaders(403, response.getBytes().length);
-                OutputStream outputStream = exchange.getResponseBody();
-                outputStream.write(response.getBytes());
-                outputStream.close();
-                System.out.println("Rejected Request with type: '" + requestType + "'   |   Request URL: '" + requestUrl + "'   |   Request Body: " + requestData);
+                int count = requestCounts.get(clientIP);
+                long lastRequestTime = requestTimestamps.get(clientIP);
+
+                long currentTime = System.currentTimeMillis();
+                long elapsedTime = currentTime - lastRequestTime;
+
+                // Reset the request count if the time window has elapsed
+                if (elapsedTime >= TimeUnit.SECONDS.toMillis(60)) {
+                    requestCounts.put(clientIP, 1);
+                    requestTimestamps.put(clientIP, currentTime);
+                } else {
+                    // Adjust this value to set the maximum number of requests allowed within the time window
+                    int REQUEST_LIMIT = 2;
+                    if (count >= REQUEST_LIMIT) {
+                        exchange.sendResponseHeaders(429, -1);
+                        exchange.close();
+                        System.out.println("Rate limit exceeded for client IP: " + clientIP);
+                        return;
+                    } else {
+                        requestCounts.put(clientIP, count + 1);
+                    }
+                }
+
+                String requestType = exchange.getRequestMethod();
+                String requestUrl = exchange.getRequestURI().toString();
+                String requestData = readRequestBody(exchange.getRequestBody());
+                if ((requestType.equals("POST") && requestData.equals(System.getenv("requestToken")) && requestUrl.equals(System.getenv("urlPath")))) {
+                    exchange.sendResponseHeaders(200, -1);
+                    exchange.close();
+                    System.out.println("Obliged Request with type: '" + requestType + "'   |   Request URL: '" + requestUrl + "'   |   Request Body: " + requestData + "   |   From: " + exchange.getRemoteAddress());
+                    try {
+                        restartRouter();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                } else {
+                    exchange.sendResponseHeaders(403, -1);
+                    exchange.close();
+                    System.out.println("Rejected Request with type: '" + requestType + "'   |   Request URL: '" + requestUrl + "'   |   Request Body: " + requestData + "   |   From: " + exchange.getRemoteAddress());
+                }
             }
         }
-    }
-    private static String readRequestBody(InputStream inputStream) throws IOException {
-        StringBuilder requestData = new StringBuilder();
-        byte[] buffer = new byte[1024];
-        int bytesRead;
-        while ((bytesRead = inputStream.read(buffer)) != -1) {
-            requestData.append(new String(buffer, 0, bytesRead));
+
+        private static String readRequestBody(InputStream inputStream) throws IOException {
+            StringBuilder requestData = new StringBuilder();
+            byte[] buffer = new byte[1024];
+            int bytesRead;
+            while ((bytesRead = inputStream.read(buffer)) != -1 && requestData.length() < 150) {
+                requestData.append(new String(buffer, 0, bytesRead));
+            }
+            return requestData.toString();
         }
-        return requestData.toString();
     }
 }
