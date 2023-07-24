@@ -201,25 +201,26 @@ public class RouterRebooter {
                         requestCounts.put(clientIP, count + 1);
                     }
                 }
-
-                String requestType = exchange.getRequestMethod();
-                String requestUrl = exchange.getRequestURI().toString();
-                String requestData = readRequestBody(exchange.getRequestBody());
-                if ((requestType.equals("POST") && requestData.equals(System.getenv("requestToken")) && requestUrl.equals(System.getenv("urlPath")))) {
-                    exchange.sendResponseHeaders(200, -1);
-                    exchange.close();
-                    System.out.println("Obliged Request with type: '" + requestType + "'   |   Request URL: '" + requestUrl + "'   |   Request Body: " + requestData + "   |   From: " + exchange.getRemoteAddress());
-                    try {
-                        restartRouter();
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                } else {
-                    exchange.sendResponseHeaders(403, -1);
-                    exchange.close();
-                    System.out.println("Rejected Request with type: '" + requestType + "'   |   Request URL: '" + requestUrl + "'   |   Request Body: " + requestData + "   |   From: " + exchange.getRemoteAddress());
-                }
             }
+
+            String requestType = exchange.getRequestMethod();
+            String requestUrl = exchange.getRequestURI().toString();
+            String requestData = readRequestBody(exchange.getRequestBody());
+            if ((requestType.equals("POST") && requestData.equals(System.getenv("requestToken")) && requestUrl.equals(System.getenv("urlPath")))) {
+                exchange.sendResponseHeaders(200, -1);
+                exchange.close();
+                System.out.println("Obliged Request with type: '" + requestType + "'   |   Request URL: '" + requestUrl + "'   |   Request Body: " + requestData + "   |   From: " + exchange.getRemoteAddress());
+                try {
+                    restartRouter();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            } else {
+                exchange.sendResponseHeaders(403, -1);
+                exchange.close();
+                System.out.println("Rejected Request with type: '" + requestType + "'   |   Request URL: '" + requestUrl + "'   |   Request Body: " + requestData + "   |   From: " + exchange.getRemoteAddress());
+            }
+
         }
 
         private static String readRequestBody(InputStream inputStream) throws IOException {
