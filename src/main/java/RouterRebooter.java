@@ -21,7 +21,7 @@ public class RouterRebooter {
 
     @SuppressWarnings("ResultOfMethodCallIgnored")
     public static void main(String[] args) {
-        int port = 59783;
+        int port = 80;
         HttpServer server;
         try {
             server = HttpServer.create(new InetSocketAddress(port), 0);
