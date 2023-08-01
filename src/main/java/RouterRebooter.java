@@ -14,8 +14,10 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.InetSocketAddress;
 import java.net.URL;
-import java.util.concurrent.ConcurrentHashMap;
+import java.nio.charset.StandardCharsets;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import static com.codeborne.selenide.Condition.interactable;
 import static com.codeborne.selenide.Selenide.$;
@@ -23,18 +25,14 @@ import static com.codeborne.selenide.Selenide.open;
 
 public class RouterRebooter {
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
         int port = 80;
-        HttpServer server;
-        try {
-            server = HttpServer.create(new InetSocketAddress(port), 0);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        HttpServer server = HttpServer.create(new InetSocketAddress(port), 0);
+
         server.createContext("/", new MyHandler());
         server.setExecutor(null);
         server.start();
-        System.out.println("Server started on container port " + port);
+        System.out.println("Server started on container (inner) port " + port);
         try {
             System.in.read();
         }
@@ -42,6 +40,11 @@ public class RouterRebooter {
     }
 
     private static void restartRouter() {
+
+        System.out.println("Initiating restart script");
+
+        Logger.getLogger("org.openqa.selenium").setLevel(Level.OFF);
+
         // Grab username and password secrets from the secret file.
         String username = System.getenv("routerUsername");
         String password = System.getenv("routerPassword");
@@ -51,7 +54,6 @@ public class RouterRebooter {
         chromeOptions.addArguments("--headless");
         chromeOptions.addArguments("--no-sandbox");
         chromeOptions.addArguments("--disable-gpu");
-        chromeOptions.addArguments("--disable-web-security");
         Configuration.browserCapabilities = chromeOptions;
 
         try {
@@ -166,68 +168,51 @@ public class RouterRebooter {
     }
 
     private static class MyHandler implements HttpHandler {
-        public ConcurrentHashMap<String, Integer> requestCounts = new ConcurrentHashMap<>();
-        public ConcurrentHashMap<String, Long> requestTimestamps = new ConcurrentHashMap<>();
+        // Request status is true if the client is being throttled.
+        public Long lastRequestTime = 0L;
 
         @Override
         public void handle(HttpExchange exchange) throws IOException {
 
-            String clientIP = exchange.getRemoteAddress().getAddress().toString();
-
-            if (!requestCounts.containsKey(clientIP)) {
-                requestCounts.put(clientIP, 1);
-                requestTimestamps.put(clientIP, System.currentTimeMillis());
-            } else {
-                int count = requestCounts.get(clientIP);
-                long lastRequestTime = requestTimestamps.get(clientIP);
-
-                long currentTime = System.currentTimeMillis();
-                long elapsedTime = currentTime - lastRequestTime;
-
-                // Reset the request count if the time window has elapsed
-                if (elapsedTime >= TimeUnit.SECONDS.toMillis(60)) {
-                    requestCounts.put(clientIP, 1);
-                    requestTimestamps.put(clientIP, currentTime);
-                } else {
-                    // Adjust this value to set the maximum number of requests allowed within the time window
-                    int REQUEST_LIMIT = 2;
-                    if (count >= REQUEST_LIMIT) {
-                        exchange.sendResponseHeaders(429, -1);
-                        exchange.close();
-                        System.out.println("Rate limit exceeded for client IP: " + clientIP);
-                        return;
-                    } else {
-                        requestCounts.put(clientIP, count + 1);
-                    }
-                }
-            }
-
+            String clientIP = exchange.getRemoteAddress().toString();
             String requestType = exchange.getRequestMethod();
             String requestUrl = exchange.getRequestURI().toString();
             String requestData = readRequestBody(exchange.getRequestBody());
-            if ((requestType.equals("POST") && requestData.equals(System.getenv("requestToken")) && requestUrl.equals(System.getenv("urlPath")))) {
-                exchange.sendResponseHeaders(200, -1);
-                exchange.close();
-                System.out.println("Obliged request with type: '" + requestType + "'   |   Request URL: '" + requestUrl + "'   |   Request Body: " + requestData + "   |   From: " + exchange.getRemoteAddress());
+            exchange.close();
+
+            long currentTime = System.currentTimeMillis();
+            long elapsedTime = currentTime - lastRequestTime;
+            lastRequestTime = currentTime;
+            if (!(elapsedTime >= TimeUnit.SECONDS.toMillis(150))) {
+                System.out.println("Rate limit exceeded for client IP: " + clientIP);
+                return;
+            }
+
+            if (requestType.equals("POST") && (requestData.equals(System.getenv("requestToken")) && requestUrl.equals(System.getenv("urlPath")))) {
+//                exchange.sendResponseHeaders(200, -1);
+//                exchange.close();
+                System.out.println("Obliged request with type: '" + requestType + "'   |   Request URL: '" + requestUrl + "'   |   Request Body: " + requestData + "   |   From: " + clientIP);
                 try {
                     restartRouter();
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
             } else {
-                exchange.sendResponseHeaders(403, -1);
-                exchange.close();
-                System.out.println("Rejected request with type: '" + requestType + "'   |   Request URL: '" + requestUrl + "'   |   Request Body: " + requestData + "   |   From: " + exchange.getRemoteAddress());
+//                exchange.sendResponseHeaders(404, -1);
+//                exchange.close();
+                System.out.println("Rejected request with type: '" + requestType + "'   |   Request URL: '" + requestUrl + "'   |   Request Body: " + requestData + "   |   From: " + clientIP);
             }
 
         }
 
-        private static String readRequestBody(InputStream inputStream) throws IOException {
+        public static String readRequestBody(InputStream inputStream) throws IOException {
             StringBuilder requestData = new StringBuilder();
-            byte[] buffer = new byte[1024];
-            int bytesRead;
-            while ((bytesRead = inputStream.read(buffer)) != -1 && requestData.length() < 150) {
-                requestData.append(new String(buffer, 0, bytesRead));
+            char[] buffer = new char[8192]; // Use a larger buffer to handle larger requests efficiently
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
+                int bytesRead;
+                while ((bytesRead = reader.read(buffer)) != -1) {
+                    requestData.append(buffer, 0, bytesRead);
+                }
             }
             return requestData.toString();
         }
