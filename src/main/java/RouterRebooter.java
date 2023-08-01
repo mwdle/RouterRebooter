@@ -201,7 +201,7 @@ public class RouterRebooter {
 
         }
 
-        public static String readRequestBody(InputStream inputStream) throws IOException {
+        private static String readRequestBody(InputStream inputStream) throws IOException {
             StringBuilder requestData = new StringBuilder();
             char[] buffer = new char[8192];
             try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
