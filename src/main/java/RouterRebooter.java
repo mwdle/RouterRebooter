@@ -189,8 +189,6 @@ public class RouterRebooter {
             }
 
             if (requestType.equals("POST") && (requestData.equals(System.getenv("requestToken")) && requestUrl.equals(System.getenv("urlPath")))) {
-//                exchange.sendResponseHeaders(200, -1);
-//                exchange.close();
                 System.out.println("Obliged request with type: '" + requestType + "'   |   Request URL: '" + requestUrl + "'   |   Request Body: " + requestData + "   |   From: " + clientIP);
                 try {
                     restartRouter();
@@ -198,8 +196,6 @@ public class RouterRebooter {
                     e.printStackTrace();
                 }
             } else {
-//                exchange.sendResponseHeaders(404, -1);
-//                exchange.close();
                 System.out.println("Rejected request with type: '" + requestType + "'   |   Request URL: '" + requestUrl + "'   |   Request Body: " + requestData + "   |   From: " + clientIP);
             }
 
@@ -207,13 +203,14 @@ public class RouterRebooter {
 
         public static String readRequestBody(InputStream inputStream) throws IOException {
             StringBuilder requestData = new StringBuilder();
-            char[] buffer = new char[8192]; // Use a larger buffer to handle larger requests efficiently
+            char[] buffer = new char[8192];
             try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
                 int bytesRead;
                 while ((bytesRead = reader.read(buffer)) != -1) {
                     requestData.append(buffer, 0, bytesRead);
                 }
             }
+            inputStream.close();
             return requestData.toString();
         }
     }
