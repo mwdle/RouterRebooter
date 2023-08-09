@@ -1,49 +1,28 @@
 import com.codeborne.selenide.Configuration;
 import com.codeborne.selenide.Selenide;
-import com.sun.net.httpserver.HttpExchange;
-import com.sun.net.httpserver.HttpHandler;
-import com.sun.net.httpserver.HttpServer;
-import org.apache.commons.lang3.time.StopWatch;
 import org.openqa.selenium.By;
 import org.openqa.selenium.chrome.ChromeOptions;
 
 import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
-import java.net.InetSocketAddress;
 import java.net.URL;
-import java.nio.charset.StandardCharsets;
-import java.util.concurrent.TimeUnit;
+import java.time.Duration;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import static com.codeborne.selenide.Condition.exist;
 import static com.codeborne.selenide.Condition.interactable;
 import static com.codeborne.selenide.Selenide.$;
 import static com.codeborne.selenide.Selenide.open;
 
 public class RouterRebooter {
 
-    public static void main(String[] args) throws IOException {
-        int port = 80;
-        HttpServer server = HttpServer.create(new InetSocketAddress(port), 0);
-
-        server.createContext("/", new MyHandler());
-        server.setExecutor(null);
-        server.start();
-        System.out.println("Server started on container (inner) port " + port);
-        try {
-            System.in.read();
-        }
-        catch (Exception ignored) {}
-    }
-
-    private static void restartRouter() {
-
+    public static void main(String[] args) {
         System.out.println("Initiating restart script");
 
         Logger.getLogger("org.openqa.selenium").setLevel(Level.OFF);
+        System.setProperty("webdriver.chrome.driver", "/RouterRebooter/chromedriver");
 
         // Grab username and password secrets from the secret file.
         String username = System.getenv("routerUsername");
@@ -56,6 +35,7 @@ public class RouterRebooter {
         chromeOptions.addArguments("--disable-gpu");
         Configuration.browserCapabilities = chromeOptions;
 
+
         try {
             open("http://192.168.0.1/?util_restart");
         }
@@ -63,19 +43,7 @@ public class RouterRebooter {
             open("http://192.168.0.1/?util_restart");
         }
 
-        StopWatch timer = new StopWatch();
-        timer.start();
-        // Wait until the login screen appears to do anything
-        while (!$(By.linkText("Login")).exists()) {
-            Selenide.sleep(200);
-            if (timer.getTime(TimeUnit.SECONDS) > 60)
-                break;
-        }
-        timer.stop();
-        timer.reset();
-
-        // Login to the restart utility
-        $(By.id("UserName")).setValue(username);
+        $(By.id("UserName")).should(exist, Duration.ofSeconds(60)).setValue(username);
         $(By.id("Password")).setValue(password);
         $(By.className("submitBtn")).click();
 
@@ -126,9 +94,10 @@ public class RouterRebooter {
 
         // Accept the javascript prompt alert
         Selenide.switchTo().alert().accept();
+        Selenide.switchTo().defaultContent();
 
-        // Sleep for 10s before exiting to ensure the request had time to go through
-        Selenide.sleep(10000);
+        // Sleep for 5s before exiting to ensure the request had time to go through
+        Selenide.sleep(5000);
 
         Selenide.closeWebDriver();
 
@@ -136,29 +105,10 @@ public class RouterRebooter {
             open("http://" + tpLinkIP + "/");
         }
 
-        timer.start();
-        while (!$(By.className("password-text")).exists()) {
-            Selenide.sleep(200);
-            if (timer.getTime(TimeUnit.SECONDS) > 30)
-                break;
-        }
-        timer.stop();
-        timer.reset();
-
-        $(By.className("password-text")).shouldBe(interactable).setValue(System.getenv("tplinkPassword"));
+        $(By.className("password-text")).shouldBe(interactable, Duration.ofSeconds(30)).setValue(System.getenv("tplinkPassword"));
         $(By.id("login-btn")).shouldBe(interactable).click();
 
-        timer.start();
-        while (!$(By.id("map_router")).exists()) {
-            Selenide.sleep(200);
-            if (timer.getTime(TimeUnit.SECONDS) > 10)
-                break;
-        }
-        timer.stop();
-        timer.reset();
-
-        $(By.id("top-control-reboot")).shouldBe(interactable).click();
-
+        $(By.id("top-control-reboot")).shouldBe(interactable, Duration.ofSeconds(10)).click();
         $(By.className("msg-btn-container")).find(By.className("btn-msg-ok")).shouldBe(interactable).click();
 
         // Sleep for 5 seconds before closing the webdriver and ending the script.
@@ -167,51 +117,4 @@ public class RouterRebooter {
         System.out.println("Home access points should have rebooted successfully.");
     }
 
-    private static class MyHandler implements HttpHandler {
-        // Request status is true if the client is being throttled.
-        public Long lastRequestTime = 0L;
-
-        @Override
-        public void handle(HttpExchange exchange) throws IOException {
-
-            String clientIP = exchange.getRemoteAddress().toString();
-            String requestType = exchange.getRequestMethod();
-            String requestUrl = exchange.getRequestURI().toString();
-            String requestData = readRequestBody(exchange.getRequestBody());
-            exchange.close();
-
-            long currentTime = System.currentTimeMillis();
-            long elapsedTime = currentTime - lastRequestTime;
-            lastRequestTime = currentTime;
-            if (!(elapsedTime >= TimeUnit.SECONDS.toMillis(150))) {
-                System.out.println("Rate limit exceeded for client IP: " + clientIP);
-                return;
-            }
-
-            if (requestType.equals("POST") && (requestData.equals(System.getenv("requestToken")) && requestUrl.equals(System.getenv("urlPath")))) {
-                System.out.println("Obliged request with type: '" + requestType + "'   |   Request URL: '" + requestUrl + "'   |   Request Body: " + requestData + "   |   From: " + clientIP);
-                try {
-                    restartRouter();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            } else {
-                System.out.println("Rejected request with type: '" + requestType + "'   |   Request URL: '" + requestUrl + "'   |   Request Body: " + requestData + "   |   From: " + clientIP);
-            }
-
-        }
-
-        private static String readRequestBody(InputStream inputStream) throws IOException {
-            StringBuilder requestData = new StringBuilder();
-            char[] buffer = new char[8192];
-            try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
-                int bytesRead;
-                while ((bytesRead = reader.read(buffer)) != -1) {
-                    requestData.append(buffer, 0, bytesRead);
-                }
-            }
-            inputStream.close();
-            return requestData.toString();
-        }
-    }
 }
