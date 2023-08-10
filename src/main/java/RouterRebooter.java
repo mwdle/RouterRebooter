@@ -9,7 +9,9 @@ import java.io.FileWriter;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.text.SimpleDateFormat;
 import java.time.Duration;
+import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -26,7 +28,7 @@ public class RouterRebooter {
         }
         catch (Throwable e) {
             writeToLogFile(e.getMessage() + System.lineSeparator() + ExceptionUtils.getStackTrace(e), "/RouterRebooter/lastFailure.log");
-            writeToLogFile("FAIL: check /RouterRebooter/lastFailure.log", "/RouterRebooter/Rebooter.log");
+            writeToLogFile(new SimpleDateFormat("MM-dd-yyyy HH:mm:ss").format(new Date()) + ": FAIL: check lastFailure.log", "/RouterRebooter/Rebooter.log");
         }
     }
 
@@ -128,7 +130,7 @@ public class RouterRebooter {
 
         Selenide.closeWebDriver();
 
-        writeToLogFile("Home access points rebooted successfully.", "/RouterRebooter/Rebooter.log");
+        writeToLogFile(new SimpleDateFormat("MM-dd-yyyy HH:mm:ss").format(new Date()) + ": Reboot Success", "/RouterRebooter/Rebooter.log");
     }
 
     public static void writeToLogFile(String log, String fileName) {
