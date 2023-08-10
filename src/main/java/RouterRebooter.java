@@ -23,17 +23,16 @@ public class RouterRebooter {
     public static void main(String[] args) {
         StringBuilder log = new StringBuilder();
         try {
-            rebootRouter(log);
+            rebootRouter();
         }
         catch (Throwable e) {
-            log.append(System.lineSeparator()).append(e.getMessage());
-            log.append(System.lineSeparator()).append(ExceptionUtils.getStackTrace(e));
+            log.append(e.getMessage()).append(System.lineSeparator()).append(ExceptionUtils.getStackTrace(e));
+            writeToLogFile(log.toString(), "/RouterRebooter/lastFailure.log");
+            writeToLogFile("Script failed to execute, check failure logs at /RouterRebooter/lastFailure.log", "/RouterRebooter/Rebooter.log");
         }
-        writeToLogFile(log.toString());
     }
 
-    public static void rebootRouter(StringBuilder log) {
-        log.append(System.lineSeparator()).append("Initiating restart script");
+    public static void rebootRouter() {
 
         Logger.getLogger("org.openqa.selenium").setLevel(Level.OFF);
 
@@ -131,11 +130,11 @@ public class RouterRebooter {
 
         Selenide.closeWebDriver();
 
-        log.append(System.lineSeparator()).append("Home access points should have rebooted successfully.");
+        writeToLogFile("Home access points should have rebooted successfully.", "/RouterRebooter/Rebooter.log");
     }
 
-    public static void writeToLogFile(String log) {
-        try (FileWriter writer = new FileWriter("/RouterRebooter/Rebooter.log")) {
+    public static void writeToLogFile(String log, String fileName) {
+        try (FileWriter writer = new FileWriter(fileName)) {
             writer.write(log);
         }
         catch (Exception ignored) {
