@@ -21,14 +21,12 @@ import static com.codeborne.selenide.Selenide.open;
 public class RouterRebooter {
 
     public static void main(String[] args) {
-        StringBuilder log = new StringBuilder();
         try {
             rebootRouter();
         }
         catch (Throwable e) {
-            log.append(e.getMessage()).append(System.lineSeparator()).append(ExceptionUtils.getStackTrace(e));
-            writeToLogFile(log.toString(), "/RouterRebooter/lastFailure.log");
-            writeToLogFile("Script failed to execute, check failure logs at /RouterRebooter/lastFailure.log", "/RouterRebooter/Rebooter.log");
+            writeToLogFile(e.getMessage() + System.lineSeparator() + ExceptionUtils.getStackTrace(e), "/RouterRebooter/lastFailure.log");
+            writeToLogFile("FAIL: check /RouterRebooter/lastFailure.log", "/RouterRebooter/Rebooter.log");
         }
     }
 
@@ -130,7 +128,7 @@ public class RouterRebooter {
 
         Selenide.closeWebDriver();
 
-        writeToLogFile("Home access points should have rebooted successfully.", "/RouterRebooter/Rebooter.log");
+        writeToLogFile("Home access points rebooted successfully.", "/RouterRebooter/Rebooter.log");
     }
 
     public static void writeToLogFile(String log, String fileName) {
@@ -138,7 +136,7 @@ public class RouterRebooter {
             writer.write(log);
         }
         catch (Exception ignored) {
-            System.out.println("Failed to create and write to log file.");
+            System.out.println("Failed to create and/or write to log file.");
         }
     }
 }
