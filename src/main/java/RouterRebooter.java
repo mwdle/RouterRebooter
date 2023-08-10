@@ -1,9 +1,11 @@
 import com.codeborne.selenide.Configuration;
 import com.codeborne.selenide.Selenide;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.openqa.selenium.By;
 import org.openqa.selenium.chrome.ChromeOptions;
 
 import java.io.BufferedReader;
+import java.io.FileWriter;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -19,10 +21,21 @@ import static com.codeborne.selenide.Selenide.open;
 public class RouterRebooter {
 
     public static void main(String[] args) {
-        System.out.println("Initiating restart script");
+        StringBuilder log = new StringBuilder();
+        try {
+            rebootRouter(log);
+        }
+        catch (Throwable e) {
+            log.append(System.lineSeparator()).append(e.getMessage());
+            log.append(System.lineSeparator()).append(ExceptionUtils.getStackTrace(e));
+        }
+        writeToLogFile(log.toString());
+    }
+
+    public static void rebootRouter(StringBuilder log) {
+        log.append(System.lineSeparator()).append("Initiating restart script");
 
         Logger.getLogger("org.openqa.selenium").setLevel(Level.OFF);
-        System.setProperty("webdriver.chrome.driver", "/RouterRebooter/chromedriver");
 
         // Grab username and password secrets from the secret file.
         String username = System.getenv("routerUsername");
@@ -35,27 +48,7 @@ public class RouterRebooter {
         chromeOptions.addArguments("--disable-gpu");
         Configuration.browserCapabilities = chromeOptions;
 
-
-        try {
-            open("http://192.168.0.1/?util_restart");
-        }
-        catch (Exception e) {
-            open("http://192.168.0.1/?util_restart");
-        }
-
-        $(By.id("UserName")).should(exist, Duration.ofSeconds(60)).setValue(username);
-        $(By.id("Password")).setValue(password);
-        $(By.className("submitBtn")).click();
-
-        Selenide.sleep(2000);
-
-        // Dismiss the retarded bullshit ads that popup upon login
-        if ($(By.id("doNotShow")).exists()) {
-            $(By.id("doNotShow")).click();
-            $(By.className("ui-button")).click();
-        }
-
-        /*
+         /*
           The following for loop finds the IP address of the gateway for the TP-Link extender before restarting the router, so that the extender can also be restarted after.
          */
         String tpLinkIP = "";
@@ -86,35 +79,67 @@ public class RouterRebooter {
                 }
                 // Close the connection
                 connection.disconnect();
-            } catch (Exception ignored) {}
+            } catch (Exception ignored) {
+            }
         }
+
+        // Open the router webpage
+        try {
+            open("http://192.168.0.1/?util_restart");
+        } catch (Exception e) {
+            open("http://192.168.0.1/?util_restart");
+        }
+
+        // Login to router webpage
+        $(By.id("UserName")).should(exist, Duration.ofSeconds(60)).setValue(username);
+        $(By.id("Password")).setValue(password);
+        $(By.className("submitBtn")).click();
+
+        Selenide.sleep(2000);
+
+        // Dismiss the retarded bullshit ads that popup upon login
+        if ($(By.id("doNotShow")).exists()) {
+            $(By.id("doNotShow")).click();
+            $(By.className("ui-button")).click();
+        }
+
+        // Open a new tab and navigate to the tp-link webpage
+        Selenide.executeJavaScript("window.open('" + "http://" + tpLinkIP + "/" + "','_blank');");
+        Selenide.switchTo().window(1);
+
+        // Prepare for reboot by navigating to the reboot prompt
+        $(By.className("password-text")).shouldBe(interactable, Duration.ofSeconds(30)).setValue(System.getenv("tplinkPassword"));
+        $(By.id("login-btn")).shouldBe(interactable).click();
+        $(By.id("top-control-reboot")).shouldBe(interactable, Duration.ofSeconds(10)).click();
+
+        // Switch back to the router tab
+        Selenide.switchTo().window(0);
 
         // Click the button to restart the router
         $(By.className("submitBtn")).shouldBe(interactable).click();
-
         // Accept the javascript prompt alert
         Selenide.switchTo().alert().accept();
-        Selenide.switchTo().defaultContent();
 
-        // Sleep for 5s before exiting to ensure the request had time to go through
-        Selenide.sleep(5000);
+        // Switch back to the tp-link tab
+        Selenide.switchTo().window(1);
 
-        Selenide.closeWebDriver();
-
-        if (!tpLinkIP.equals("")) {
-            open("http://" + tpLinkIP + "/");
-        }
-
-        $(By.className("password-text")).shouldBe(interactable, Duration.ofSeconds(30)).setValue(System.getenv("tplinkPassword"));
-        $(By.id("login-btn")).shouldBe(interactable).click();
-
-        $(By.id("top-control-reboot")).shouldBe(interactable, Duration.ofSeconds(10)).click();
+        // Click the button to restart the TP-Link extender.
         $(By.className("msg-btn-container")).find(By.className("btn-msg-ok")).shouldBe(interactable).click();
 
-        // Sleep for 5 seconds before closing the webdriver and ending the script.
-        Selenide.sleep(5000);
+        // Sleep for 10s before exiting to ensure the requests had time to go through
+        Selenide.sleep(10000);
+
         Selenide.closeWebDriver();
-        System.out.println("Home access points should have rebooted successfully.");
+
+        log.append(System.lineSeparator()).append("Home access points should have rebooted successfully.");
     }
 
+    public static void writeToLogFile(String log) {
+        try (FileWriter writer = new FileWriter("/RouterRebooter/Rebooter.log")) {
+            writer.write(log);
+        }
+        catch (Exception ignored) {
+            System.out.println("Failed to create and write to log file.");
+        }
+    }
 }
