@@ -12,8 +12,6 @@ import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.time.Duration;
 import java.util.Date;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import static com.codeborne.selenide.Condition.exist;
 import static com.codeborne.selenide.Condition.interactable;
@@ -33,8 +31,6 @@ public class RouterRebooter {
     }
 
     public static void rebootRouter() {
-
-        Logger.getLogger("org.openqa.selenium").setLevel(Level.OFF);
 
         // Grab username and password secrets from the secret file.
         String username = System.getenv("routerUsername");
@@ -58,18 +54,21 @@ public class RouterRebooter {
                 // Open a connection to the URL
                 HttpURLConnection connection = (HttpURLConnection) url.openConnection();
                 connection.setRequestMethod("GET");
-                connection.setConnectTimeout(1000);
+                connection.setConnectTimeout(500);
                 connection.setReadTimeout(5000);
                 // Get the HTTP response code
                 int responseCode = connection.getResponseCode();
                 // Check if the website is reachable (HTTP 2xx response code)
                 if (responseCode >= 200 && responseCode < 300) {
                     StringBuilder responseContent = new StringBuilder();
-                    BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+                    InputStreamReader inReader = new InputStreamReader(connection.getInputStream());
+                    BufferedReader in = new BufferedReader(inReader);
                     String line;
                     while ((line = in.readLine()) != null) {
                         responseContent.append(line);
                     }
+                    in.close();
+                    inReader.close();
                     if (responseContent.toString().contains("tp-link")) {
                         tpLinkIP = address;
                         connection.disconnect();
