@@ -23,15 +23,15 @@ public class RouterRebooter {
     public static void main(String[] args) {
         try {
             rebootRouter();
+            writeToLogFile(new SimpleDateFormat("MM-dd-yyyy HH:mm:ss").format(new Date()) + ": Reboot Success", "/RouterRebooter/Rebooter.log");
         }
         catch (Throwable e) {
             writeToLogFile(e.getMessage() + System.lineSeparator() + ExceptionUtils.getStackTrace(e), "/RouterRebooter/lastFailure.log");
-            writeToLogFile(new SimpleDateFormat("MM-dd-yyyy HH:mm:ss").format(new Date()) + ": FAIL: check lastFailure.log", "/RouterRebooter/Rebooter.log");
+            writeToLogFile(new SimpleDateFormat("MM-dd-yyyy HH:mm:ss").format(new Date()) + ": FAILED: check lastFailure.log", "/RouterRebooter/Rebooter.log");
         }
     }
 
     public static void rebootRouter() {
-
         // Grab username and password secrets from the secret file.
         String username = System.getenv("routerUsername");
         String password = System.getenv("routerPassword");
@@ -44,7 +44,7 @@ public class RouterRebooter {
         Configuration.browserCapabilities = chromeOptions;
 
          /*
-          The following for loop finds the IP address of the gateway for the TP-Link extender before restarting the router, so that the extender can also be restarted after.
+          The following loop finds the IP address of the gateway for the TP-Link extender before restarting the router, so that the extender can be restarted after.
          */
         String tpLinkIP = "";
         for (int i = 2; i < 254; i++) {
@@ -93,13 +93,9 @@ public class RouterRebooter {
         $(By.id("Password")).setValue(password);
         $(By.className("submitBtn")).click();
 
-        Selenide.sleep(2000);
-
         // Dismiss the retarded bullshit ads that popup upon login
-        if ($(By.id("doNotShow")).exists()) {
-            $(By.id("doNotShow")).click();
-            $(By.className("ui-button")).click();
-        }
+        $(By.id("doNotShow")).should(exist, Duration.ofSeconds(5)).click();
+        $(By.className("ui-button")).click();
 
         // Open a new tab and navigate to the tp-link webpage
         Selenide.executeJavaScript("window.open('" + "http://" + tpLinkIP + "/" + "','_blank');");
@@ -124,20 +120,16 @@ public class RouterRebooter {
         // Click the button to restart the TP-Link extender.
         $(By.className("msg-btn-container")).find(By.className("btn-msg-ok")).shouldBe(interactable).click();
 
-        // Sleep for 10s before exiting to ensure the requests had time to go through
-        Selenide.sleep(10000);
+        // Sleep for 15s before exiting to ensure the requests had time to go through
+        Selenide.sleep(15000);
 
         Selenide.closeWebDriver();
-
-        writeToLogFile(new SimpleDateFormat("MM-dd-yyyy HH:mm:ss").format(new Date()) + ": Reboot Success", "/RouterRebooter/Rebooter.log");
     }
 
     public static void writeToLogFile(String log, String fileName) {
         try (FileWriter writer = new FileWriter(fileName)) {
             writer.write(log);
         }
-        catch (Exception ignored) {
-            System.out.println("Failed to create and/or write to log file.");
-        }
+        catch (Exception ignored) {}
     }
 }
