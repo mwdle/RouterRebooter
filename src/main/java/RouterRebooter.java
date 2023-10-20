@@ -82,20 +82,12 @@ public class RouterRebooter {
         }
 
         // Open the router webpage
-        try {
-            open("http://192.168.0.1/?util_restart");
-        } catch (Exception e) {
-            open("http://192.168.0.1/?util_restart");
-        }
+        open("https://192.168.0.1/cgi-bin/luci/admin/troubleshooting/restart");
 
         // Login to router webpage
-        $(By.id("UserName")).should(exist, Duration.ofSeconds(60)).setValue(username);
-        $(By.id("Password")).setValue(password);
-        $(By.className("submitBtn")).click();
-
-        // Dismiss the retarded bullshit ads that popup upon login
-        $(By.id("doNotShow")).should(exist, Duration.ofSeconds(5)).click();
-        $(By.className("ui-button")).click();
+        $(By.name("luci_username")).should(exist, Duration.ofSeconds(10)).setValue(username);
+        $(By.name("luci_password")).setValue(password);
+        $(By.id("loginbtn")).click();
 
         // Open a new tab and navigate to the tp-link webpage
         Selenide.executeJavaScript("window.open('" + "http://" + tpLinkIP + "/" + "','_blank');");
@@ -110,7 +102,7 @@ public class RouterRebooter {
         Selenide.switchTo().window(0);
 
         // Click the button to restart the router
-        $(By.className("submitBtn")).shouldBe(interactable).click();
+        $(By.linkText("RESTART GATEWAY")).shouldBe(interactable).click();
         // Accept the javascript prompt alert
         Selenide.switchTo().alert().accept();
 
