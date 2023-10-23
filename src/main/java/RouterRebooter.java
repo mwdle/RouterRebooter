@@ -102,7 +102,7 @@ public class RouterRebooter {
         Selenide.switchTo().window(0);
 
         // Click the button to restart the router
-        $(By.linkText("RESTART GATEWAY")).shouldBe(interactable).click();
+        $(By.partialLinkText("RESTART GATEWAY")).shouldBe(interactable).click();
         // Accept the javascript prompt alert
         Selenide.switchTo().alert().accept();
 
