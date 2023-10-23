@@ -13,7 +13,6 @@ import java.text.SimpleDateFormat;
 import java.time.Duration;
 import java.util.Date;
 
-import static com.codeborne.selenide.Condition.exist;
 import static com.codeborne.selenide.Condition.interactable;
 import static com.codeborne.selenide.Selenide.$;
 import static com.codeborne.selenide.Selenide.open;
@@ -32,8 +31,7 @@ public class RouterRebooter {
     }
 
     public static void rebootRouter() {
-        // Grab username and password secrets from the secret file.
-        String username = System.getenv("routerUsername");
+        // Grab password environment variable.
         String password = System.getenv("routerPassword");
 
         ChromeOptions chromeOptions = new ChromeOptions();
@@ -85,7 +83,6 @@ public class RouterRebooter {
         open("https://192.168.0.1/cgi-bin/luci/admin/troubleshooting/restart");
 
         // Login to router webpage
-        $(By.name("luci_username")).should(exist, Duration.ofSeconds(10)).setValue(username);
         $(By.name("luci_password")).setValue(password);
         $(By.id("loginbtn")).click();
 
