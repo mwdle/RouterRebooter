@@ -76,8 +76,7 @@ public class RouterRebooter {
                 }
                 // Close the connection
                 connection.disconnect();
-            } catch (Exception ignored) {
-            }
+            } catch (Exception ignored) {}
         }
 
         // Open the router webpage
