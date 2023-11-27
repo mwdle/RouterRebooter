@@ -31,8 +31,9 @@ public class RouterRebooter {
     }
 
     public static void rebootRouter() {
-        // Grab password environment variable.
-        String password = System.getenv("routerPassword");
+        // Grab password environment variables.
+        String routerPassword = System.getenv("routerPassword");
+        String extenderPassword = System.getenv("tplinkPassword");
 
         ChromeOptions chromeOptions = new ChromeOptions();
         chromeOptions.addArguments("--incognito");
@@ -83,7 +84,7 @@ public class RouterRebooter {
         open("https://192.168.0.1/cgi-bin/luci/admin/troubleshooting/restart");
 
         // Login to router webpage
-        $(By.name("luci_password")).setValue(password);
+        $(By.name("luci_password")).should(interactable, Duration.ofSeconds(30)).setValue(routerPassword);
         $(By.id("loginbtn")).click();
 
         // Open a new tab and navigate to the tp-link webpage
@@ -91,7 +92,7 @@ public class RouterRebooter {
         Selenide.switchTo().window(1);
 
         // Prepare for reboot by navigating to the reboot prompt
-        $(By.className("password-text")).shouldBe(interactable, Duration.ofSeconds(30)).setValue(System.getenv("tplinkPassword"));
+        $(By.className("password-text")).shouldBe(interactable, Duration.ofSeconds(30)).setValue(extenderPassword);
         $(By.id("login-btn")).shouldBe(interactable).click();
         $(By.id("top-control-reboot")).shouldBe(interactable, Duration.ofSeconds(10)).click();
 
@@ -99,7 +100,8 @@ public class RouterRebooter {
         Selenide.switchTo().window(0);
 
         // Click the button to restart the router
-        $(By.partialLinkText("RESTART GATEWAY")).shouldBe(interactable).click();
+        $(By.partialLinkText("RESTART GATEWAY")).shouldBe(interactable, Duration.ofSeconds(10)).click();
+
         // Accept the javascript prompt alert
         Selenide.switchTo().alert().accept();
 
@@ -109,8 +111,8 @@ public class RouterRebooter {
         // Click the button to restart the TP-Link extender.
         $(By.className("msg-btn-container")).find(By.className("btn-msg-ok")).shouldBe(interactable).click();
 
-        // Sleep for 15s before exiting to ensure the requests had time to go through
-        Selenide.sleep(15000);
+        // Sleep for 10s before exiting to ensure the requests had time to go through
+        Selenide.sleep(10000);
 
         Selenide.closeWebDriver();
     }
