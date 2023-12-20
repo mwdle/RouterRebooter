@@ -87,7 +87,7 @@ public class RouterRebooter {
         $(By.id("loginbtn")).click();
 
         // Open a new tab and navigate to the tp-link webpage
-        Selenide.executeJavaScript("window.open('" + "http://" + tpLinkIP + "/" + "','_blank');");
+        Selenide.executeJavaScript("window.open('" + "http://" + tpLinkIP + "','_blank');");
         Selenide.switchTo().window(1);
 
         // Prepare for reboot by navigating to the reboot prompt
