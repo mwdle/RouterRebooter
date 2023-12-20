@@ -1,6 +1,5 @@
 import com.codeborne.selenide.Configuration;
 import com.codeborne.selenide.Selenide;
-import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.openqa.selenium.By;
 import org.openqa.selenium.chrome.ChromeOptions;
 
@@ -11,6 +10,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.time.Duration;
+import java.util.Arrays;
 import java.util.Date;
 
 import static com.codeborne.selenide.Condition.interactable;
@@ -25,7 +25,7 @@ public class RouterRebooter {
             writeToLogFile(new SimpleDateFormat("MM-dd-yyyy HH:mm:ss").format(new Date()) + ": Reboot Success", "/RouterRebooter/Rebooter.log");
         }
         catch (Throwable e) {
-            writeToLogFile(e.getMessage() + System.lineSeparator() + ExceptionUtils.getStackTrace(e), "/RouterRebooter/lastFailure.log");
+            writeToLogFile(e.getMessage() + System.lineSeparator() + Arrays.toString(e.getStackTrace()), "/RouterRebooter/lastFailure.log");
             writeToLogFile(new SimpleDateFormat("MM-dd-yyyy HH:mm:ss").format(new Date()) + ": FAILED: check lastFailure.log", "/RouterRebooter/Rebooter.log");
         }
     }
