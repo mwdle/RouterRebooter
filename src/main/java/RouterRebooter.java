@@ -40,6 +40,7 @@ public class RouterRebooter {
         chromeOptions.addArguments("--headless");
         chromeOptions.addArguments("--no-sandbox");
         chromeOptions.addArguments("--disable-gpu");
+        chromeOptions.setBinary("/usr/bin/google-chrome");
         Configuration.browserCapabilities = chromeOptions;
 
          /*
