@@ -5,6 +5,7 @@
   <artifactId>RouterRebooter</artifactId>
   <version>1.0</version>
   <packaging>jar</packaging>
+
   <properties>
     <maven.compiler.source>17</maven.compiler.source>
     <maven.compiler.target>17</maven.compiler.target>
@@ -12,6 +13,7 @@
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <java.version>17</java.version>
   </properties>
+
   <dependencies>
     <dependency>
       <groupId>com.codeborne</groupId>
@@ -24,8 +26,8 @@
       <artifactId>slf4j-nop</artifactId>
       <version>2.0.0-alpha6</version>
     </dependency>
-
   </dependencies>
+
   <build>
     <plugins>
       <plugin>
