@@ -37,16 +37,9 @@ RUN touch /run/openrc/softlevel
 # Expose ssh
 EXPOSE 22
 
-RUN mkdir -p /RouterRebooter |
+RUN mkdir -p /RouterRebooter \
     && chown -R rr:rr /RouterRebooter \
     && chmod 700 /RouterRebooter
-
-USER rr
-
-# Supply your pub key via `--build-arg rr_jar_path="/path/to/rr.jar"` when running `docker build`
-ARG rr_jar_path
-# Copy RouterRebooter jar
-COPY "$rr_jar_path" /RouterRebooter/
 
 # Supply your pub key via `--build-arg rr_jar_path="/path/to/rr.jar"` when running `docker build`
 ARG rr_jar_path
