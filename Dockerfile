@@ -14,7 +14,7 @@ ENV CHROME_BIN=/usr/bin/chromium-browser \
     CHROME_PATH=/usr/lib/chromium/ \
     CHROMIUM_FLAGS="--disable-software-rasterizer --disable-dev-shm-usage"
 
-# Install Java 17
+# Install Java 21
 RUN apk add openjdk21
 
 # Supply your pub key via `--build-arg ssh_pub_key="$(cat ~/.ssh/id_rsa.pub)"` when running `docker build`
