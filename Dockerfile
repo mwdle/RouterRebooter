@@ -20,7 +20,7 @@ RUN apk add openjdk17
 # Create user 'rr'
 RUN mkdir /home/rr \
     && adduser -h /home/rr -s /bin/sh -D rr \
-    && chown -R rr:rr /home/rr \
+    && chown -R rr:rr /home/rr
 # Create SSH configuration for user rr
 RUN mkdir -p /home/rr/.ssh \
     && chmod 0700 /home/rr/.ssh \
