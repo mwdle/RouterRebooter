@@ -33,7 +33,7 @@ public class RouterRebooter {
     public static void rebootRouter() {
         // Grab password environment variables.
         String routerPassword = System.getenv("routerPassword");
-        String extenderPassword = System.getenv("tplinkPassword");
+        String extenderPassword = System.getenv("extenderPassword");
 
         ChromeOptions chromeOptions = new ChromeOptions();
         chromeOptions.addArguments("--incognito");
