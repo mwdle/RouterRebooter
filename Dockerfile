@@ -46,8 +46,8 @@ COPY "$er_jar_path" /RouterRebooter/
 ARG routerPassword
 # Supply your pub key via `--build-arg extenderPassword="somePassword"` when running `docker build`
 ARG extenderPassword
-ENV routerPassword ${routerPassword}
-ENV extenderPassword ${extenderPassword}
+ENV routerPassword=${routerPassword}
+ENV extenderPassword=${extenderPassword}
 
 # Run SSH server
 CMD ["/usr/sbin/sshd", "-D", "-e"]
