@@ -17,41 +17,37 @@ ENV CHROME_BIN=/usr/bin/chromium-browser \
 # Install Java 17
 RUN apk add openjdk17
 
-# Create user 'rr'
-RUN mkdir /home/rr \
-    && adduser -h /home/rr -s /bin/sh -D rr \
-    && chown -R rr:rr /home/rr
-# Create SSH configuration for user rr
-RUN mkdir -p /home/rr/.ssh \
-    && chmod 0700 /home/rr/.ssh \
-    && passwd -u rr
 # Supply your pub key via `--build-arg ssh_pub_key="$(cat ~/.ssh/id_rsa.pub)"` when running `docker build`
 ARG ssh_pub_key
-RUN echo "$ssh_pub_key" > /home/rr/.ssh/authorized_keys
-# Install OpenRC and OpenSSH
-RUN apk add openrc openssh \
+
+# Setup SSH server
+RUN mkdir -p /root/.ssh \
+    && chmod 0700 /root/.ssh \
+    && echo "$ssh_pub_key" > /root/.ssh/authorized_keys \
+    && apk add openssh \
     && ssh-keygen -A \
     && echo -e "PasswordAuthentication no" >> /etc/ssh/sshd_config
-# Touch softlevel because system was initialized without openrc
-RUN touch /run/openrc/softlevel
+
 # Expose ssh
 EXPOSE 22
 
 RUN mkdir -p /RouterRebooter \
-    && chown -R rr:rr /RouterRebooter \
     && chmod 700 /RouterRebooter
-
 # Supply your pub key via `--build-arg rr_jar_path="/path/to/rr.jar"` when running `docker build`
 ARG rr_jar_path
-# Copy RouterRebooter jar
-COPY "$rr_jar_path" /RouterRebooter/
-
 # Supply your pub key via `--build-arg er_jar_path="/path/to/er.jar"` when running `docker build`
 ARG er_jar_path
+# Copy RouterRebooter jar
+COPY "$rr_jar_path" /RouterRebooter/
 # Copy ExtenderRebooter jar
 COPY "$er_jar_path" /RouterRebooter/
 
-USER rr
+# Supply your pub key via `--build-arg routerPassword="somePassword"` when running `docker build`
+ARG routerPassword
+# Supply your pub key via `--build-arg extenderPassword="somePassword"` when running `docker build`
+ARG extenderPassword
+ENV routerPassword ${routerPassword}
+ENV extenderPassword ${extenderPassword}
 
 # Run SSH server
-ENTRYPOINT ["sh", "-c", "rc-status; rc-service sshd start"]
+CMD ["/usr/sbin/sshd", "-D", "-e"]
