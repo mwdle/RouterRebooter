@@ -76,13 +76,13 @@ public class RouterRebooter {
 
         // Restart the extender
         open("http://" + tpLinkIP);
-        $(By.className("password-text")).shouldBe(interactable, Duration.ofSeconds(20)).setValue(extenderPassword);
+        $(By.className("password-text")).shouldBe(interactable, Duration.ofSeconds(20)).sendKeys(extenderPassword);
         $(By.id("login-btn")).shouldBe(interactable, Duration.ofSeconds(10)).click();
         $(By.id("top-control-reboot")).shouldBe(interactable, Duration.ofSeconds(20)).click();
         $(By.className("msg-btn-container")).should(exist).find(By.className("btn-msg-ok")).shouldBe(interactable).click();
 
         // Sleep for 5s to ensure the request had time to go through.
-        Selenide.sleep(5);
+        Selenide.sleep(5000);
 
         // Restart the router
         open("https://192.168.0.1/cgi-bin/luci/admin/troubleshooting/restart");
