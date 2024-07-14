@@ -1,21 +1,13 @@
-FROM alpine:latest
+FROM ubuntu:22.04
 
-# Install latest Chromium.
-RUN apk upgrade --no-cache --available \
-    && apk add --no-cache \
-      chromium-swiftshader \
-      ttf-freefont \
-      font-noto-emoji \
-    && apk add --no-cache \
-      --repository=https://dl-cdn.alpinelinux.org/alpine/edge/community \
-      font-wqy-zenhei
-COPY local.conf /etc/fonts/local.conf
-ENV CHROME_BIN=/usr/bin/chromium-browser \
-    CHROME_PATH=/usr/lib/chromium/ \
-    CHROMIUM_FLAGS="--disable-software-rasterizer --disable-dev-shm-usage"
+# Install Google Chrome
+RUN apt-get update
+RUN apt-get -y install wget
+RUN wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+RUN apt-get install ./google-chrome*.deb --yes
 
 # Install Java 21
-RUN apk add openjdk21
+RUN apt-get -y install openjdk-21-jdk
 
 # Supply your pub key via `--build-arg ssh_pub_key="$(cat ~/.ssh/id_rsa.pub)"` when running `docker build`
 ARG ssh_pub_key
@@ -24,9 +16,10 @@ ARG ssh_pub_key
 RUN mkdir -p /root/.ssh \
     && chmod 0700 /root/.ssh \
     && echo "$ssh_pub_key" > /root/.ssh/authorized_keys \
-    && apk add openssh \
+    && apt-get -y install openssh-server \
     && ssh-keygen -A \
-    && echo -e "PasswordAuthentication no" >> /etc/ssh/sshd_config
+    && echo "PasswordAuthentication no" >> /etc/ssh/sshd_config \
+    && mkdir /var/run/sshd
 
 # Expose ssh
 EXPOSE 22
@@ -42,12 +35,5 @@ COPY "$rr_jar_path" /RouterRebooter/
 # Copy ExtenderRebooter jar
 COPY "$er_jar_path" /RouterRebooter/
 
-# Supply your pub key via `--build-arg routerPassword="somePassword"` when running `docker build`
-ARG routerPassword
-# Supply your pub key via `--build-arg extenderPassword="somePassword"` when running `docker build`
-ARG extenderPassword
-ENV routerPassword=${routerPassword}
-ENV extenderPassword=${extenderPassword}
-
 # Run SSH server
-CMD ["/usr/sbin/sshd", "-D", "-e"]
+CMD ["/usr/sbin/sshd","-D"]
