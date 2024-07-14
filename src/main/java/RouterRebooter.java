@@ -22,11 +22,11 @@ public class RouterRebooter {
     public static void main(String[] args) {
         try {
             rebootRouter();
-            writeToLogFile(new SimpleDateFormat("MM-dd-yyyy HH:mm:ss").format(new Date()) + ": Reboot Success", "/RouterRebooter/Rebooter.log");
+            writeToLogFile(new SimpleDateFormat("MM-dd-yyyy HH:mm:ss").format(new Date()) + ": Reboot Success", "/RouterRebooter/RouterRebooter.log");
         }
         catch (Throwable e) {
             writeToLogFile(e.getMessage() + System.lineSeparator() + Arrays.toString(e.getStackTrace()), "/RouterRebooter/lastFailure.log");
-            writeToLogFile(new SimpleDateFormat("MM-dd-yyyy HH:mm:ss").format(new Date()) + ": FAILED: check lastFailure.log", "/RouterRebooter/Rebooter.log");
+            writeToLogFile(new SimpleDateFormat("MM-dd-yyyy HH:mm:ss").format(new Date()) + ": FAILED: check lastFailure.log", "/RouterRebooter/RouterRebooter.log");
         }
     }
 
