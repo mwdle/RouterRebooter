@@ -36,10 +36,7 @@ public class RouterRebooter {
         String extenderPassword = System.getenv("extenderPassword");
 
         ChromeOptions chromeOptions = new ChromeOptions();
-        chromeOptions.addArguments("--incognito");
-        chromeOptions.addArguments("--headless");
-        chromeOptions.addArguments("--no-sandbox");
-        chromeOptions.addArguments("--disable-gpu");
+        chromeOptions.addArguments("--incognito", "--headless", "--no-sandbox", "--disable-gpu", "--start-maximized", "--window-size=1920,1080");
         chromeOptions.setBinary("/usr/bin/chromium-browser");
         Configuration.browserCapabilities = chromeOptions;
 
