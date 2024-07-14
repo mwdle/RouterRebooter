@@ -28,8 +28,8 @@ public class RouterRebooter {
 
     public static void rebootRouter() {
         // Grab password environment variables.
-        String routerPassword = System.getenv("routerPassword");
-        String extenderPassword = System.getenv("extenderPassword");
+        String routerPassword = System.getenv("ROUTER_PASSWORD");
+        String extenderPassword = System.getenv("EXTENDER_PASSWORD");
 
         ChromeOptions chromeOptions = new ChromeOptions();
         chromeOptions.addArguments("--incognito", "--headless", "--no-sandbox", "--disable-gpu", "--start-maximized", "--window-size=1920,1080");
@@ -76,7 +76,7 @@ public class RouterRebooter {
 
         // Restart the extender
         open("http://" + tpLinkIP);
-        $(By.className("password-text")).shouldBe(interactable, Duration.ofSeconds(20)).sendKeys(extenderPassword);
+        $(By.className("password-text")).shouldBe(interactable, Duration.ofSeconds(20)).setValue(extenderPassword);
         $(By.id("login-btn")).shouldBe(interactable, Duration.ofSeconds(10)).click();
         $(By.id("top-control-reboot")).shouldBe(interactable, Duration.ofSeconds(20)).click();
         $(By.className("msg-btn-container")).should(exist).find(By.className("btn-msg-ok")).shouldBe(interactable).click();

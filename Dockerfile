@@ -9,13 +9,13 @@ RUN apt-get install ./google-chrome*.deb --yes
 # Install Java 21
 RUN apt-get -y install openjdk-21-jdk
 
-# Supply your pub key via `--build-arg ssh_pub_key="$(cat ~/.ssh/id_rsa.pub)"` when running `docker build`
-ARG ssh_pub_key
+# Supply your pub key via `--build-arg SSH_PUB_KEY="$(cat ~/.ssh/id_rsa.pub)"` when running `docker build`
+ARG SSH_PUB_KEY
 
 # Setup SSH server
 RUN mkdir -p /root/.ssh \
     && chmod 0700 /root/.ssh \
-    && echo "$ssh_pub_key" > /root/.ssh/authorized_keys \
+    && echo "$SSH_PUB_KEY" > /root/.ssh/authorized_keys \
     && apt-get -y install openssh-server \
     && ssh-keygen -A \
     && echo "PasswordAuthentication no" >> /etc/ssh/sshd_config \
@@ -29,16 +29,23 @@ RUN mkdir -p /RouterRebooter \
     && echo "Not run yet" > /RouterRebooter/RouterRebooter.log \
     && echo "Not run yet" > /RouterRebooter/ExtenderRebooter.log
 
-# Supply your pub key via `--build-arg rr_jar_path="/path/to/rr.jar"` when running `docker build`
-ARG rr_jar_path
-# Supply your pub key via `--build-arg er_jar_path="/path/to/er.jar"` when running `docker build`
-ARG er_jar_path
+# Supply your pub key via `--build-arg RR_JAR_PATH="/path/to/rr.jar"` when running `docker build` (path must be relative to Dockerfile execution context)
+ARG RR_JAR_PATH
+# Supply your pub key via `--build-arg ER_JAR_PATH="/path/to/er.jar"` when running `docker build` (path must be relative to Dockerfile execution context)
+ARG ER_JAR_PATH
 # Copy RouterRebooter jar
-COPY "$rr_jar_path" /RouterRebooter/
+COPY "$RR_JAR_PATH" /RouterRebooter/
 # Copy ExtenderRebooter jar
-COPY "$er_jar_path" /RouterRebooter/
+COPY "$ER_JAR_PATH" /RouterRebooter/
 
-ENV TZ=America/Denver
+# Supply your pub key via `--build-arg ROUTER_PASSWORD=''` when running `docker build`
+ARG ROUTER_PASSWORD
+# Supply your pub key via `--build-arg EXTENDER_PASSWORD=''` when running `docker build`
+ARG EXTENDER_PASSWORD
+RUN echo "#!/bin/bash\nexport ROUTER_PASSWORD=${ROUTER_PASSWORD}\njava -jar /RouterRebooter/RouterRebooter.jar" > /RouterRebooter/executeRouterRebooter.sh \
+    && chmod +x /RouterRebooter/executeRouterRebooter.sh \
+    && echo "#!/bin/bash\nexport EXTENDER_PASSWORD=${EXTENDER_PASSWORD}\njava -jar /RouterRebooter/ExtenderRebooter.jar" > /RouterRebooter/executeExtenderRebooter.sh \
+    && chmod +x /RouterRebooter/executeExtenderRebooter.sh
 
 # Run SSH server
 CMD ["/usr/sbin/sshd","-D"]
