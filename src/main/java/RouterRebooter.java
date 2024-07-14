@@ -87,6 +87,9 @@ public class RouterRebooter {
 
         // Restart the router
         open("https://192.168.0.1/cgi-bin/luci/admin/troubleshooting/restart");
+	try {
+		$(By.id("okButton")).shouldBe(interactable, Duration.ofSeconds(6)).click();
+	} catch (Exception ignored) {}
         $(By.name("luci_password")).should(interactable, Duration.ofSeconds(30)).setValue(routerPassword);
         $(By.id("loginbtn")).shouldBe(interactable).click();
         $(By.partialLinkText("RESTART GATEWAY")).shouldBe(interactable, Duration.ofSeconds(10)).click();
