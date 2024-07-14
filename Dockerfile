@@ -25,7 +25,10 @@ RUN mkdir -p /root/.ssh \
 EXPOSE 22
 
 RUN mkdir -p /RouterRebooter \
-    && chmod 700 /RouterRebooter
+    && chmod 700 /RouterRebooter \
+    && echo "Not run yet" > /RouterRebooter/RouterRebooter.log \
+    && echo "Not run yet" > /RouterRebooter/ExtenderRebooter.log
+
 # Supply your pub key via `--build-arg rr_jar_path="/path/to/rr.jar"` when running `docker build`
 ARG rr_jar_path
 # Supply your pub key via `--build-arg er_jar_path="/path/to/er.jar"` when running `docker build`
