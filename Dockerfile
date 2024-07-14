@@ -38,5 +38,7 @@ COPY "$rr_jar_path" /RouterRebooter/
 # Copy ExtenderRebooter jar
 COPY "$er_jar_path" /RouterRebooter/
 
+ENV TZ=America/Denver
+
 # Run SSH server
 CMD ["/usr/sbin/sshd","-D"]
