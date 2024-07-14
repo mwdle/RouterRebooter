@@ -77,7 +77,7 @@ public class RouterRebooter {
 
         // Restart the extender
         open("http://" + tpLinkIP);
-        $(By.className("password-text")).shouldBe(interactable, Duration.ofSeconds(20)).sendKeys(extenderPassword);
+        $(By.className("password-text")).shouldBe(interactable, Duration.ofSeconds(20)).setValue(extenderPassword);
         $(By.id("login-btn")).shouldBe(interactable, Duration.ofSeconds(10)).click();
         $(By.id("top-control-reboot")).shouldBe(interactable, Duration.ofSeconds(20)).click();
         $(By.className("msg-btn-container")).should(exist).find(By.className("btn-msg-ok")).shouldBe(interactable).click();
@@ -87,9 +87,9 @@ public class RouterRebooter {
 
         // Restart the router
         open("https://192.168.0.1/cgi-bin/luci/admin/troubleshooting/restart");
-	try {
-		$(By.id("okButton")).shouldBe(interactable, Duration.ofSeconds(6)).click();
-	} catch (Exception ignored) {}
+        try {
+            $(By.id("okButton")).shouldBe(interactable, Duration.ofSeconds(6)).click();
+        } catch (Exception ignored) {}
         $(By.name("luci_password")).should(interactable, Duration.ofSeconds(30)).setValue(routerPassword);
         $(By.id("loginbtn")).shouldBe(interactable).click();
         $(By.partialLinkText("RESTART GATEWAY")).shouldBe(interactable, Duration.ofSeconds(10)).click();
