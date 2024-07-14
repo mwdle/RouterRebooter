@@ -13,8 +13,7 @@ import java.time.Duration;
 import java.util.Arrays;
 import java.util.Date;
 
-import static com.codeborne.selenide.Condition.exist;
-import static com.codeborne.selenide.Condition.interactable;
+import static com.codeborne.selenide.Condition.*;
 import static com.codeborne.selenide.Selenide.$;
 import static com.codeborne.selenide.Selenide.open;
 
@@ -87,10 +86,8 @@ public class RouterRebooter {
 
         // Restart the router
         open("https://192.168.0.1/cgi-bin/luci/admin/troubleshooting/restart");
-        try {
-            $(By.id("okButton")).shouldBe(interactable, Duration.ofSeconds(6)).click();
-        }
-        catch (Exception ignored) {}
+        Selenide.sleep(5000);
+        if ($(By.id("okButton")).is(visible)) $(By.id("okButton")).click();
         $(By.name("luci_password")).should(interactable, Duration.ofSeconds(30)).setValue(routerPassword);
         $(By.id("loginbtn")).shouldBe(interactable).click();
         $(By.partialLinkText("RESTART GATEWAY")).shouldBe(interactable, Duration.ofSeconds(10)).click();
