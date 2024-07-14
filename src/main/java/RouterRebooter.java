@@ -1,7 +1,6 @@
 import com.codeborne.selenide.Configuration;
 import com.codeborne.selenide.Selenide;
 import org.openqa.selenium.By;
-import org.openqa.selenium.WindowType;
 import org.openqa.selenium.chrome.ChromeOptions;
 
 import java.io.BufferedReader;
@@ -77,7 +76,7 @@ public class RouterRebooter {
         }
 
         // Restart the extender
-        Selenide.open("http://" + tpLinkIP + "/");
+        open("http://" + tpLinkIP);
         $(By.className("password-text")).shouldBe(interactable, Duration.ofSeconds(20)).sendKeys(extenderPassword);
         $(By.id("login-btn")).shouldBe(interactable, Duration.ofSeconds(10)).click();
         $(By.id("top-control-reboot")).shouldBe(interactable, Duration.ofSeconds(20)).click();
