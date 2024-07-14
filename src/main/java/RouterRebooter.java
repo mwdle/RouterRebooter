@@ -1,6 +1,7 @@
 import com.codeborne.selenide.Configuration;
 import com.codeborne.selenide.Selenide;
 import org.openqa.selenium.By;
+import org.openqa.selenium.WindowType;
 import org.openqa.selenium.chrome.ChromeOptions;
 
 import java.io.BufferedReader;
@@ -13,6 +14,7 @@ import java.time.Duration;
 import java.util.Arrays;
 import java.util.Date;
 
+import static com.codeborne.selenide.Condition.exist;
 import static com.codeborne.selenide.Condition.interactable;
 import static com.codeborne.selenide.Selenide.$;
 import static com.codeborne.selenide.Selenide.open;
@@ -37,7 +39,7 @@ public class RouterRebooter {
 
         ChromeOptions chromeOptions = new ChromeOptions();
         chromeOptions.addArguments("--incognito", "--headless", "--no-sandbox", "--disable-gpu", "--start-maximized", "--window-size=1920,1080");
-        chromeOptions.setBinary("/usr/bin/chromium-browser");
+        chromeOptions.setBinary("/usr/bin/google-chrome");
         Configuration.browserCapabilities = chromeOptions;
 
          /*
@@ -82,16 +84,17 @@ public class RouterRebooter {
 
         // Login to router webpage
         $(By.name("luci_password")).should(interactable, Duration.ofSeconds(30)).setValue(routerPassword);
-        $(By.id("loginbtn")).click();
+        $(By.id("loginbtn")).shouldBe(interactable).click();
 
         // Open a new tab and navigate to the tp-link webpage
-        Selenide.executeJavaScript("window.open('" + "http://" + tpLinkIP + "','_blank');");
+        Selenide.switchTo().newWindow(WindowType.TAB);
         Selenide.switchTo().window(1);
+        Selenide.open("http://" + tpLinkIP + "/");
 
         // Prepare for reboot by navigating to the reboot prompt
-        $(By.className("password-text")).shouldBe(interactable, Duration.ofSeconds(30)).setValue(extenderPassword);
-        $(By.id("login-btn")).shouldBe(interactable).click();
-        $(By.id("top-control-reboot")).shouldBe(interactable, Duration.ofSeconds(10)).click();
+        $(By.className("password-text")).shouldBe(interactable, Duration.ofSeconds(20)).sendKeys(extenderPassword);
+        $(By.id("login-btn")).shouldBe(interactable, Duration.ofSeconds(10)).click();
+        $(By.id("top-control-reboot")).shouldBe(interactable, Duration.ofSeconds(20)).click();
 
         // Switch back to the router tab
         Selenide.switchTo().window(0);
@@ -106,10 +109,10 @@ public class RouterRebooter {
         Selenide.switchTo().window(1);
 
         // Click the button to restart the TP-Link extender.
-        $(By.className("msg-btn-container")).find(By.className("btn-msg-ok")).shouldBe(interactable).click();
+        $(By.className("msg-btn-container")).should(exist).find(By.className("btn-msg-ok")).shouldBe(interactable).click();
 
         // Sleep for 10s before exiting to ensure the requests had time to go through
-        Selenide.sleep(10000);
+        Selenide.sleep(5000);
 
         Selenide.closeWebDriver();
     }
