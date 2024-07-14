@@ -21,14 +21,10 @@ import static com.codeborne.selenide.Selenide.open;
 
 public class RouterRebooter {
 
-    public static void main(String[] args) {
-        try {
-            rebootRouter();
-            writeToLogFile(new SimpleDateFormat("MM-dd-yyyy HH:mm:ss").format(new Date()) + ": Reboot Success", "/RouterRebooter/RouterRebooter.log");
-        }
-        catch (Throwable e) {
-            writeToLogFile(e.getMessage() + System.lineSeparator() + Arrays.toString(e.getStackTrace()), "/RouterRebooter/lastFailure.log");
-            writeToLogFile(new SimpleDateFormat("MM-dd-yyyy HH:mm:ss").format(new Date()) + ": FAILED: check lastFailure.log", "/RouterRebooter/RouterRebooter.log");
+    public static void writeToLogFile(String log, String fileName) {
+        try (FileWriter writer = new FileWriter(fileName)) {
+            writer.write(log);
+        } catch (Exception ignored) {
         }
     }
 
@@ -43,7 +39,7 @@ public class RouterRebooter {
         Configuration.browserCapabilities = chromeOptions;
 
          /*
-          The following loop finds the IP address of the gateway for the TP-Link extender before restarting the router, so that the extender can be restarted after.
+          Finds the IP address of the TP-Link extender (IP is not static).
          */
         String tpLinkIP = "";
         for (int i = 2; i < 254; i++) {
@@ -76,51 +72,40 @@ public class RouterRebooter {
                 }
                 // Close the connection
                 connection.disconnect();
-            } catch (Exception ignored) {}
+            } catch (Exception ignored) {
+            }
         }
 
-        // Open the router webpage
-        open("https://192.168.0.1/cgi-bin/luci/admin/troubleshooting/restart");
-
-        // Login to router webpage
-        $(By.name("luci_password")).should(interactable, Duration.ofSeconds(30)).setValue(routerPassword);
-        $(By.id("loginbtn")).shouldBe(interactable).click();
-
-        // Open a new tab and navigate to the tp-link webpage
-        Selenide.switchTo().newWindow(WindowType.TAB);
-        Selenide.switchTo().window(1);
+        // Restart the extender
         Selenide.open("http://" + tpLinkIP + "/");
-
-        // Prepare for reboot by navigating to the reboot prompt
         $(By.className("password-text")).shouldBe(interactable, Duration.ofSeconds(20)).sendKeys(extenderPassword);
         $(By.id("login-btn")).shouldBe(interactable, Duration.ofSeconds(10)).click();
         $(By.id("top-control-reboot")).shouldBe(interactable, Duration.ofSeconds(20)).click();
-
-        // Switch back to the router tab
-        Selenide.switchTo().window(0);
-
-        // Click the button to restart the router
-        $(By.partialLinkText("RESTART GATEWAY")).shouldBe(interactable, Duration.ofSeconds(10)).click();
-
-        // Accept the javascript prompt alert
-        Selenide.switchTo().alert().accept();
-
-        // Switch back to the tp-link tab
-        Selenide.switchTo().window(1);
-
-        // Click the button to restart the TP-Link extender.
         $(By.className("msg-btn-container")).should(exist).find(By.className("btn-msg-ok")).shouldBe(interactable).click();
 
-        // Sleep for 10s before exiting to ensure the requests had time to go through
+        // Sleep for 5s to ensure the request had time to go through.
+        Selenide.sleep(5);
+
+        // Restart the router
+        open("https://192.168.0.1/cgi-bin/luci/admin/troubleshooting/restart");
+        $(By.name("luci_password")).should(interactable, Duration.ofSeconds(30)).setValue(routerPassword);
+        $(By.id("loginbtn")).shouldBe(interactable).click();
+        $(By.partialLinkText("RESTART GATEWAY")).shouldBe(interactable, Duration.ofSeconds(10)).click();
+        Selenide.switchTo().alert().accept();
+
+        // Sleep for 5s to ensure the request had time to go through.
         Selenide.sleep(5000);
 
         Selenide.closeWebDriver();
     }
 
-    public static void writeToLogFile(String log, String fileName) {
-        try (FileWriter writer = new FileWriter(fileName)) {
-            writer.write(log);
+    public static void main(String[] args) {
+        try {
+            rebootRouter();
+            writeToLogFile(new SimpleDateFormat("MM-dd-yyyy HH:mm:ss").format(new Date()) + ": Reboot Success", "/RouterRebooter/RouterRebooter.log");
+        } catch (Throwable e) {
+            writeToLogFile(e.getMessage() + System.lineSeparator() + Arrays.toString(e.getStackTrace()), "/RouterRebooter/lastFailure.log");
+            writeToLogFile(new SimpleDateFormat("MM-dd-yyyy HH:mm:ss").format(new Date()) + ": FAILED: check lastFailure.log", "/RouterRebooter/RouterRebooter.log");
         }
-        catch (Exception ignored) {}
     }
 }
