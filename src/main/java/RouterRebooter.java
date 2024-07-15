@@ -22,8 +22,8 @@ public class RouterRebooter {
     public static void writeToLogFile(String log, String fileName) {
         try (FileWriter writer = new FileWriter(fileName)) {
             writer.write(log);
-        } catch (Exception ignored) {
         }
+	catch (Exception ignored) {}
     }
 
     public static void rebootRouter() {
@@ -70,8 +70,8 @@ public class RouterRebooter {
                 }
                 // Close the connection
                 connection.disconnect();
-            } catch (Exception ignored) {
             }
+	    catch (Exception ignored) {}
         }
 
         // Restart the extender
@@ -81,20 +81,18 @@ public class RouterRebooter {
         $(By.id("top-control-reboot")).shouldBe(interactable, Duration.ofSeconds(20)).click();
         $(By.className("msg-btn-container")).should(exist).find(By.className("btn-msg-ok")).shouldBe(interactable).click();
 
-        // Sleep for 5s to ensure the request had time to go through.
-        Selenide.sleep(5000);
+        // Sleep for 3s to ensure the request had time to go through.
+        Selenide.sleep(3000);
 
         // Restart the router
         open("https://192.168.0.1/cgi-bin/luci/admin/troubleshooting/restart");
-        Selenide.sleep(5000);
-        if ($(By.id("okButton")).is(visible)) $(By.id("okButton")).click();
         $(By.name("luci_password")).should(interactable, Duration.ofSeconds(30)).setValue(routerPassword);
         $(By.id("loginbtn")).shouldBe(interactable).click();
         $(By.partialLinkText("RESTART GATEWAY")).shouldBe(interactable, Duration.ofSeconds(10)).click();
         Selenide.switchTo().alert().accept();
 
-        // Sleep for 5s to ensure the request had time to go through.
-        Selenide.sleep(5000);
+        // Sleep for 3s to ensure the request had time to go through.
+        Selenide.sleep(3000);
 
         Selenide.closeWebDriver();
     }
@@ -103,7 +101,8 @@ public class RouterRebooter {
         try {
             rebootRouter();
             writeToLogFile(new SimpleDateFormat("MM-dd-yyyy HH:mm:ss").format(new Date()) + ": Reboot Success", "/RouterRebooter/RouterRebooter.log");
-        } catch (Throwable e) {
+        }
+	catch (Throwable e) {
             writeToLogFile(e.getMessage() + System.lineSeparator() + Arrays.toString(e.getStackTrace()), "/RouterRebooter/lastFailure.log");
             writeToLogFile(new SimpleDateFormat("MM-dd-yyyy HH:mm:ss").format(new Date()) + ": FAILED: check lastFailure.log", "/RouterRebooter/RouterRebooter.log");
         }

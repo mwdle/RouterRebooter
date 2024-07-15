@@ -42,9 +42,9 @@ COPY "$ER_JAR_PATH" /RouterRebooter/
 ARG ROUTER_PASSWORD
 # Supply your pub key via `--build-arg EXTENDER_PASSWORD=''` when running `docker build`
 ARG EXTENDER_PASSWORD
-RUN echo "#!/bin/bash\nexport ROUTER_PASSWORD=${ROUTER_PASSWORD}\nexport EXTENDER_PASSWORD=${EXTENDER_PASSWORD}\njava -jar /RouterRebooter/RouterRebooter.jar" > /RouterRebooter/executeRouterRebooter.sh \
+RUN echo "#!/bin/bash\nexport ROUTER_PASSWORD='${ROUTER_PASSWORD}'\nexport EXTENDER_PASSWORD='${EXTENDER_PASSWORD}'\njava -jar /RouterRebooter/RouterRebooter.jar" > /RouterRebooter/executeRouterRebooter.sh \
     && chmod +x /RouterRebooter/executeRouterRebooter.sh \
-    && echo "#!/bin/bash\nexport EXTENDER_PASSWORD=${EXTENDER_PASSWORD}\njava -jar /RouterRebooter/ExtenderRebooter.jar" > /RouterRebooter/executeExtenderRebooter.sh \
+    && echo "#!/bin/bash\nexport EXTENDER_PASSWORD='${EXTENDER_PASSWORD}'\njava -jar /RouterRebooter/ExtenderRebooter.jar" > /RouterRebooter/executeExtenderRebooter.sh \
     && chmod +x /RouterRebooter/executeExtenderRebooter.sh
 
 # Run SSH server
