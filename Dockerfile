@@ -26,12 +26,12 @@ RUN mkdir -p /RouterRebooter \
     && chmod 700 /RouterRebooter \
     && echo "Not run yet" > /RouterRebooter/RouterRebooter.log \
     && echo "Not run yet" > /RouterRebooter/ExtenderRebooter.log \
-# Supply your router rebooter executable jar via `--build-arg RR_JAR_PATH="/path/to/rr.jar"` when running `docker build` (path must be relative to Dockerfile execution context)
-ARG RR_JAR_PATH
-COPY "$RR_JAR_PATH" /RouterRebooter/
-# Supply your extender rebooter executable jar via `--build-arg ER_JAR_PATH="/path/to/er.jar"` when running `docker build` (path must be relative to Dockerfile execution context)
-ARG ER_JAR_PATH
-COPY "$ER_JAR_PATH" /RouterRebooter/
+# Supply your router rebooter executable jar via `--build-arg rr_jar_path="/path/to/rr.jar"` when running `docker build` (path must be relative to Dockerfile execution context)
+ARG rr_jar_path
+COPY "$rr_jar_path" /RouterRebooter/
+# Supply your extender rebooter executable jar via `--build-arg er_jar_path="/path/to/er.jar"` when running `docker build` (path must be relative to Dockerfile execution context)
+ARG er_jar_path
+COPY "$er_jar_path" /RouterRebooter/
 # Supply your router password via `--build-arg ROUTER_PASSWORD=''` when running `docker build`
 ARG ROUTER_PASSWORD
 # Supply your extender password via `--build-arg EXTENDER_PASSWORD=''` when running `docker build`
