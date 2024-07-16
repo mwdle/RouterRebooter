@@ -3,17 +3,13 @@ import com.codeborne.selenide.Selenide;
 import org.openqa.selenium.By;
 import org.openqa.selenium.chrome.ChromeOptions;
 
-import java.io.BufferedReader;
 import java.io.FileWriter;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.time.Duration;
 import java.util.Arrays;
 import java.util.Date;
 
-import static com.codeborne.selenide.Condition.*;
+import static com.codeborne.selenide.Condition.interactable;
 import static com.codeborne.selenide.Selenide.$;
 import static com.codeborne.selenide.Selenide.open;
 
