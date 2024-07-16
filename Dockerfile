@@ -25,7 +25,7 @@ EXPOSE 22
 RUN mkdir -p /RouterRebooter \
     && chmod 700 /RouterRebooter \
     && echo "Not run yet" > /RouterRebooter/RouterRebooter.log \
-    && echo "Not run yet" > /RouterRebooter/ExtenderRebooter.log \
+    && echo "Not run yet" > /RouterRebooter/ExtenderRebooter.log
 # Supply your router rebooter executable jar via `--build-arg RR_JAR_PATH="/path/to/rr.jar"` when running `docker build` (path must be relative to Dockerfile execution context)
 ARG RR_JAR_PATH
 COPY "$RR_JAR_PATH" /RouterRebooter
