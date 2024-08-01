@@ -1,0 +1,24 @@
+services:
+  RouterRebooter:
+    image: mwdle/router_rebooter:latest
+    container_name: RouterRebooter
+    restart: unless-stopped
+    hostname: routerrebooter
+    networks:
+      - RouterRebooter
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ${DOCKER_VOLUMES}/HomeAssistant/.ssh/id_rsa.pub:/root/.ssh/authorized_keys:ro
+      - ${DOCKER_VOLUMES}/RouterRebooter/secrets/router_pass:/RouterRebooter/secrets/router_pass:ro
+      - ${DOCKER_VOLUMES}/RouterRebooter/secrets/extender_pass:/RouterRebooter/secrets/extender_pass:ro
+      - ${DOCKER_VOLUMES}/RouterRebooter/data:/RouterRebooter
+    environment:
+      - SCREEN_WIDTH=1920
+      - SCREEN_HEIGHT=1080
+      - SCREEN_DEPTH=24
+      - TZ=America/Denver
+
+networks:
+  RouterRebooter:
+    driver: bridge
+    name: RouterRebooter
