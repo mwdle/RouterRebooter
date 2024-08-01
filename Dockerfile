@@ -27,9 +27,9 @@ RUN mkdir -p /RouterRebooter \
     && echo "Not run yet" > /RouterRebooter/RouterRebooter.log \
     && echo "Not run yet" > /RouterRebooter/ExtenderRebooter.log
 
-RUN echo "#!/bin/bash\nexport ROUTER_PASSWORD='$(cat /RouterRebooter/secrets/router_pass)'\njava -jar /RouterRebooter/RouterRebooter.jar" > /RouterRebooter/executeRouterRebooter.sh \
+RUN echo "#!/bin/bash\nexport ROUTER_PASSWORD='$(cat /RouterRebooter/secrets/router_pass)'\njava -jar /RouterRebooter/data/RouterRebooter.jar" > /RouterRebooter/executeRouterRebooter.sh \
     && chmod +x /RouterRebooter/executeRouterRebooter.sh \
-    && echo "#!/bin/bash\nexport EXTENDER_PASSWORD='$(cat /RouterRebooter/secrets/extender_pass)'\njava -jar /RouterRebooter/ExtenderRebooter.jar" > /RouterRebooter/executeExtenderRebooter.sh \
+    && echo "#!/bin/bash\nexport EXTENDER_PASSWORD='$(cat /RouterRebooter/secrets/extender_pass)'\njava -jar /RouterRebooter/data/ExtenderRebooter.jar" > /RouterRebooter/executeExtenderRebooter.sh \
     && chmod +x /RouterRebooter/executeExtenderRebooter.sh
 
 # Run SSH server

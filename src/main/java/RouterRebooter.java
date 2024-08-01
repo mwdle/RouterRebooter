@@ -25,11 +25,6 @@ public class RouterRebooter {
     public static void rebootRouter() {
         String routerPassword = System.getenv("ROUTER_PASSWORD");
 
-        ChromeOptions chromeOptions = new ChromeOptions();
-        chromeOptions.addArguments("--incognito", "--headless", "--no-sandbox", "--disable-gpu", "--start-maximized", "--window-size=1920,1080");
-        chromeOptions.setBinary("/usr/bin/google-chrome");
-        Configuration.browserCapabilities = chromeOptions;
-
         open("https://192.168.0.1/cgi-bin/luci/admin/troubleshooting/restart");
         $(By.name("luci_password")).should(interactable, Duration.ofSeconds(10)).setValue(routerPassword);
         $(By.id("loginbtn")).shouldBe(interactable).click();
@@ -39,14 +34,22 @@ public class RouterRebooter {
         Selenide.closeWebDriver();
     }
 
+    public static void rebootExtender() {
+
+    }
+
     public static void main(String[] args) {
+        ChromeOptions chromeOptions = new ChromeOptions();
+        chromeOptions.addArguments("--incognito", "--headless", "--no-sandbox", "--disable-gpu", "--start-maximized", "--window-size=1920,1080");
+        chromeOptions.setBinary("/usr/bin/google-chrome");
+        Configuration.browserCapabilities = chromeOptions;
         try {
             rebootRouter();
-            writeTextToFile(new SimpleDateFormat("MM-dd-yyyy HH:mm:ss").format(new Date()) + ": Reboot Success", "/RouterRebooter/RouterRebooter.log");
+            writeTextToFile(new SimpleDateFormat("MM-dd-yyyy HH:mm:ss").format(new Date()) + ": Reboot Success", "/RouterRebooter/data/RouterRebooter.log");
         }
 	    catch (Throwable e) {
-            writeTextToFile(e.getMessage() + System.lineSeparator() + Arrays.toString(e.getStackTrace()), "/RouterRebooter/lastFailure.log");
-            writeTextToFile(new SimpleDateFormat("MM-dd-yyyy HH:mm:ss").format(new Date()) + ": FAILED: check lastFailure.log", "/RouterRebooter/RouterRebooter.log");
+            writeTextToFile(e.getMessage() + System.lineSeparator() + Arrays.toString(e.getStackTrace()), "/RouterRebooter/data/lastFailure.log");
+            writeTextToFile(new SimpleDateFormat("MM-dd-yyyy HH:mm:ss").format(new Date()) + ": FAILED: check lastFailure.log", "/RouterRebooter/data/RouterRebooter.log");
         }
     }
 }
