@@ -8,7 +8,7 @@ services:
       - RouterRebooter
     volumes:
       - /etc/localtime:/etc/localtime:ro
-      - ${DOCKER_VOLUMES}/HomeAssistant/.ssh/id_rsa.pub:/root/.ssh/authorized_keys:ro
+      - ${DOCKER_VOLUMES}/HomeAssistant/config/.ssh/id_rsa.pub:/root/.ssh/authorized_keys:ro
       - ${DOCKER_VOLUMES}/RouterRebooter/secrets/router_pass:/RouterRebooter/secrets/router_pass:ro
       - ${DOCKER_VOLUMES}/RouterRebooter/secrets/extender_pass:/RouterRebooter/secrets/extender_pass:ro
       - ${DOCKER_VOLUMES}/RouterRebooter/data:/RouterRebooter/data

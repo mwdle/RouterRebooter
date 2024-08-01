@@ -22,15 +22,14 @@ RUN mkdir -p /root/.ssh \
 EXPOSE 22
 
 # Setup Router / Extender rebooter
-RUN mkdir -p /RouterRebooter \
-    && chmod 700 /RouterRebooter \
-    && echo "Not run yet" > /RouterRebooter/RouterRebooter.log \
-    && echo "Not run yet" > /RouterRebooter/ExtenderRebooter.log
+RUN mkdir -p /RouterRebooter/data \
+    && chmod 700 /RouterRebooter/data \
+    && echo "Not run yet" > /RouterRebooter/data/RouterRebooter.log \
+    && echo "Not run yet" > /RouterRebooter/data/ExtenderRebooter.log
 
-RUN echo "#!/bin/bash\nexport ROUTER_PASSWORD='$(cat /RouterRebooter/secrets/router_pass)'\njava -jar /RouterRebooter/data/RouterRebooter.jar" > /RouterRebooter/executeRouterRebooter.sh \
-    && chmod +x /RouterRebooter/executeRouterRebooter.sh \
-    && echo "#!/bin/bash\nexport EXTENDER_PASSWORD='$(cat /RouterRebooter/secrets/extender_pass)'\njava -jar /RouterRebooter/data/ExtenderRebooter.jar" > /RouterRebooter/executeExtenderRebooter.sh \
-    && chmod +x /RouterRebooter/executeExtenderRebooter.sh
+# Prepare the rebooter execution script
+RUN echo "#!/bin/bash\nexport ROUTER_PASSWORD='$(cat /RouterRebooter/secrets/router_pass)'\nexport EXTENDER_PASSWORD='$(cat /RouterRebooter/secrets/extender_pass)'\njava -jar /RouterRebooter/data/Rebooter.jar $1" > /RouterRebooter/data/executeRebooter.sh \
+    && chmod +x /RouterRebooter/data/executeRebooter.sh
 
 # Run SSH server
 CMD ["/usr/sbin/sshd","-D"]
