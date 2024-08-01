@@ -19,7 +19,7 @@
             <configuration>
               <transformers>
                 <transformer>
-                  <mainClass>RouterRebooter</mainClass>
+                  <mainClass>Rebooter</mainClass>
                 </transformer>
                 <transformer />
               </transformers>

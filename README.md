@@ -17,7 +17,7 @@ A containerizable Selenide script to reboot an Arris SURFboard G54 WiFi router a
 
 # How to use:
 ### Note: If you wish to only use the router or extender rebooter instead of both, simply follow the below instructions below for the one you wish to use.
-1. Use the ```maven package``` command to build an executable jar file for the script. This will create a Rebooter.jar file in the 'target' folder.
+1. Use the ```mvn package``` command to build an executable jar file for the script. This will create a Rebooter.jar file in the 'target' folder.
 2. If you do not wish to containerize the script, you may stop at this step and use the executable jar file as you wish after exporting ```ROUTER_PASSWORD``` or ```EXTENDER_PASSWORD``` environment variables and running with "java -jar rebooter.jar router" or "java -jar rebooter.jar extender" respectively.
 3. To build a docker image for the scripts, run the following Docker build command from the RouterRebooter project folder:  
   3.a ```docker build -t mwdle/router_rebooter:latest .```
