@@ -35,18 +35,18 @@ To add entities in Home Assistant for triggering manually, or via scripts and au
 
 ```
 shell_command:
-  router_rebooter: ssh -i /config/.ssh/id_rsa -o 'StrictHostKeyChecking=no' root@RouterRebooter '/RouterRebooter/data/executeRebooter.sh router' && exit
-  extender_rebooter: ssh -i /config/.ssh/id_rsa -o 'StrictHostKeyChecking=no' root@RouterRebooter '/RouterRebooter/data/executeRebooter.sh extender' && exit
+  router_rebooter: ssh -i ~/.ssh/id_rsa -o 'StrictHostKeyChecking=no' root@RouterRebooter '/RouterRebooter/data/executeRebooter.sh router' && exit
+  extender_rebooter: ssh -i ~/.ssh/id_rsa -o 'StrictHostKeyChecking=no' root@RouterRebooter '/RouterRebooter/data/executeRebooter.sh extender' && exit
 
 command_line:
   - sensor:
       name: RouterRebooter Status
       scan_interval: 300 # 5 minute polling interval
-      command: "ssh -i /config/.ssh/id_rsa -o 'StrictHostKeyChecking=no' root@RouterRebooter 'cat /RouterRebooter/data/RouterRebooter.log' && exit"
+      command: "ssh -i ~/.ssh/id_rsa -o 'StrictHostKeyChecking=no' root@RouterRebooter 'cat /RouterRebooter/data/RouterRebooter.log' && exit"
   - sensor:
       name: ExtenderRebooter Status
       scan_interval: 300 # 5 minute polling interval
-      command: "ssh -i /config/.ssh/id_rsa -o 'StrictHostKeyChecking=no' root@RouterRebooter 'cat /RouterRebooter/data/ExtenderRebooter.log' && exit"
+      command: "ssh -i ~/.ssh/id_rsa -o 'StrictHostKeyChecking=no' root@RouterRebooter 'cat /RouterRebooter/data/ExtenderRebooter.log' && exit"
 ``` 
 
 The entities card works nicely for these entities in Home Assistant:  
