@@ -14,7 +14,7 @@ A containerizable Selenide script to reboot an Arris SURFboard G54 WiFi router a
 * I use HomeAssistant (in a container) to trigger the script via an SSH shell command.
   * To allow this, HomeAssistant must have SSH access to the device running the script.
   * Therefore, to avoid allowing the HomeAssistant container to access the host machine, the script can be containerized.
-  * Additionally, if your HomeAssistant container is in a MACVlan network it cannot access the host, so containerization of RouterRebooter is necessary.
+  * Additionally, if your HomeAssistant container is in a MACVlan network it cannot access the host. Therefore, containerization allows the script to be triggered via Docker Networks when running Home Assistant in a MACVlan.
 
 # How to use:
 ### Note: If you wish to only use the router or extender rebooter instead of both, simply follow the below instructions below for the one you wish to use.
