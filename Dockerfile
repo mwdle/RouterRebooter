@@ -1,18 +1,21 @@
 FROM ubuntu:22.04
 
 # Install Google Chrome
-RUN apt-get update
-RUN apt-get -y install wget
-RUN wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
-RUN apt-get install ./google-chrome*.deb --yes
+RUN apt-get update \
+    && apt-get -y install wget \
+    && wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb \
+    && apt-get install ./google-chrome*.deb --yes \
+    && apt-get clean
 
 # Install Java 21
-RUN apt-get -y install openjdk-21-jdk
+RUN apt-get -y install openjdk-21-jdk \
+    && apt-get clean
 
 # Setup SSH
 RUN mkdir -p /root/.ssh \
     && chmod 0700 /root/.ssh \
     && apt-get -y install openssh-server \
+    && apt-get clean \
     && ssh-keygen -A \
     && echo "PasswordAuthentication no" >> /etc/ssh/sshd_config \
     && mkdir /var/run/sshd
