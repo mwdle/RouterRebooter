@@ -32,5 +32,9 @@ RUN mkdir -p /RouterRebooter/data \
 RUN echo "#!/bin/bash\nexport ROUTER_PASSWORD=\$(cat /RouterRebooter/secrets/router_pass)\nexport EXTENDER_PASSWORD=\$(cat /RouterRebooter/secrets/extender_pass)\njava -jar /RouterRebooter/data/Rebooter.jar \$1" > /RouterRebooter/data/executeRebooter.sh \
     && chmod +x /RouterRebooter/data/executeRebooter.sh
 
+COPY entrypoint.sh /RouterRebooter/entrypoint.sh
+
+RUN chmod +x /RouterRebooter/entrypoint.sh
+
 # Run SSH server
-CMD ["/usr/sbin/sshd","-D"]
+CMD ["/RouterRebooter/entrypoint.sh"]
