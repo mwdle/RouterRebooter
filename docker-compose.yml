@@ -17,6 +17,11 @@ services:
       - SCREEN_HEIGHT=1080
       - SCREEN_DEPTH=24
       - TZ=America/Denver
+    deploy:
+      resources:
+        limits: 
+          cpus: '0.50'
+          memory: 250M
 
 networks:
   RouterRebooter:
