@@ -22,16 +22,15 @@ A containerizable Selenide script to reboot an Arris SURFboard G54 WiFi router a
 ## How to use  
 
 1. Use the ```mvn package``` command to build an executable jar file for the script. This will create a Rebooter.jar file in the 'target' folder.  
-2. If you do not wish to containerize the script, you may stop at this step and use the executable jar file as you wish after exporting ```ROUTER_PASSWORD``` or ```EXTENDER_PASSWORD``` environment variables and running with "java -jar rebooter.jar router" or "java -jar rebooter.jar extender" respectively.  
-3. To build a docker image for the scripts, run the following Docker build command from the RouterRebooter project folder:
-  3.a ```docker build -t mwdle/router_rebooter:latest .```  
+2. If you do not wish to containerize the script, you may stop at this step and use the executable jar file as you wish after exporting ```ROUTER_PASSWORD``` and/or ```EXTENDER_PASSWORD``` environment variables. Execute with ```java -jar Rebooter.jar router``` or ```java -jar Rebooter.jar extender```.  
+3. To build a docker image for the scripts, run the following Docker build command from the RouterRebooter project folder: ```docker build -t mwdle/router_rebooter:latest .```  
 4. Create a file ```router_pass``` and ```extender_pass``` containing the gateway access passwords (not Wi-Fi passwords) of the respective devices.  
 5. Move the .jar and password files you created in steps 1 and 4 to a folder of your choosing, ensure the .jar files are marked as executable, and update the bind mounts in the Docker Compose file accordingly.  
 6. Modify the bind mount in the Docker Compose file for ```id_rsa.pub``` to use the public key of the device that initiates the SSH connection to RouterRebooter.  
-7. Start by running ```docker compose up -d```  
-8. To run the script, ssh or docker exec into the container and execute ```/RouterRebooter/data/executeRebooter.sh router``` or ```/RouterRebooter/data/executeRebooter.sh extender```  
-9. If setting up in Home Assistant, you may need to run ```docker exec -it HomeAssistant bash``` and then run ```ssh root@router_rebooter``` and enter 'yes' to add the RouterRebooter to the known hosts file.
-  9.a Anytime you remove the container and start it again, Home Assistant will not connect to RouterRebooter until you delete the known_hosts file in Home Assistant and repeat step 9.  
+7. Start by executing ```docker compose up -d```  
+8. To run the script, ```docker exec``` into the container and execute ```/RouterRebooter/data/executeRebooter.sh router``` or ```/RouterRebooter/data/executeRebooter.sh extender```  
+9. If setting up access for Home Assistant, you must ```docker exec``` into the container, execute ```ssh root@router_rebooter```, then enter 'yes' to add RouterRebooter to the known hosts file.
+10. Anytime you remove the container and start it again, Home Assistant will not connect to RouterRebooter until you delete the ```known_hosts``` file in Home Assistant and repeat step 9.  
 
 ## Home Assistant Triggers & Sensors  
 
