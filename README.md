@@ -2,6 +2,17 @@
 
 A containerizable Selenide script to reboot an Arris SURFboard G54 WiFi router and TP-Link RE650 extender  
 
+## Table of Contents  
+
+* [Description](#routerrebooter)  
+* [Context](#context)  
+* [General Information](#general-information)
+* [Reasons For Containerization](#reasons-for-containerization)
+* [Getting Started](#getting-started)
+* [Home Assistant Triggers & Sensors](#home-assistant-triggers--sensors)
+* [License](#license)  
+* [Disclaimer](#disclaimer)  
+
 ## Context  
 
 * My home network often experiences latency and other issues that are resolved after a router/extender restart.  
@@ -9,28 +20,79 @@ A containerizable Selenide script to reboot an Arris SURFboard G54 WiFi router a
 
 ## General Information  
 
-* A Dockerfile is provided to allow containerization and secure execution of the script triggered by a separate (SSH enabled) container.  
-* The Selenide code can be easily adapted to match your make and model of router/extender.  
+* The RouterRebooter.java Selenide code can be easily adapted to match your make and model of router/extender.  
+* A Dockerfile and Docker Compose file is provided to allow containerization and secure execution of the script triggered by the host or another (SSH enabled) container.  
 
-## Reason for containerization  
+## Reasons For Containerization  
 
 * I use HomeAssistant (in a container) to trigger the script via an SSH shell command.
   * To allow this, HomeAssistant must have SSH access to the device running the script.  
 * Therefore, to avoid allowing the HomeAssistant container to access the host machine, the script can be containerized.  
-* Additionally, if your HomeAssistant container is in a MACVlan network it cannot access the host, so the script must be containerized.  
+* Additionally, if your HomeAssistant container is in a MACVlan network it cannot access the host, so the script must be containerized to allow access to your HomeAssistant container.  
 
-## How to use  
+## Getting Started  
 
-1. Use the ```mvn package``` command to build an executable jar file for the script. This will create a Rebooter.jar file in the 'target' folder.  
-2. If you do not wish to containerize the script, you may stop at this step and use the executable jar file as you wish after exporting ```ROUTER_PASSWORD``` and/or ```EXTENDER_PASSWORD``` environment variables. Execute with ```java -jar Rebooter.jar router``` or ```java -jar Rebooter.jar extender```.  
-3. To build a docker image for the scripts, run the following Docker build command from the RouterRebooter project folder: ```docker build -t mwdle/router_rebooter:latest .```  
-4. Create a file ```router_pass``` and ```extender_pass``` containing the gateway access passwords (not Wi-Fi passwords) of the respective devices.  
-5. Move the .jar and password files you created in steps 1 and 4 to a folder of your choosing, ensure the .jar files are marked as executable, and update the bind mounts in the Docker Compose file accordingly.  
-6. Modify the bind mount in the Docker Compose file for ```id_rsa.pub``` to use the public key of the device that initiates the SSH connection to RouterRebooter.  
-7. Start by executing ```docker compose up -d```  
-8. To run the script, ```docker exec``` into the container and execute ```/RouterRebooter/data/executeRebooter.sh router``` or ```/RouterRebooter/data/executeRebooter.sh extender```  
-9. If setting up access for Home Assistant, you must ```docker exec``` into the container, execute ```ssh root@router_rebooter```, then enter 'yes' to add RouterRebooter to the known hosts file.
-10. Anytime you remove the container and start it again, Home Assistant will not connect to RouterRebooter until you delete the ```known_hosts``` file in Home Assistant and repeat step 9.  
+1. Clone the repository:  
+
+    ```shell
+    git clone https://github.com/mwdle/RouterRebooter.git
+    ```  
+
+2. Change the ```.env``` file properties:  
+
+    ```properties
+    DOCKER_VOLUMES=<PATH_TO_DOCKER_VOLUMES_FOLDER> # A folder on your system to store bind mounts for Docker containers.
+    ```  
+
+3. Execute the following command to create a Rebooter.jar file in the 'target' folder:  
+
+    ```shell
+    mvn package
+    ```  
+
+4. If you do not wish to containerize the script, you may stop at this step and run the executable jar file using the following:
+
+    ```shell
+    export ROUTER_PASSWORD=<YOUR_ROUTER_PASSWORD>
+    # or
+    export EXTENDER_PASSWORD=<YOUR_EXTENDER_PASSWORD>
+    ```  
+  
+    then:
+  
+    ```shell
+    java -jar Rebooter.jar router
+    # or
+    java -jar Rebooter.jar extender
+    ```  
+
+5. To build a docker image for the scripts, execute the following Docker build command from the RouterRebooter project folder:  
+
+    ```shell
+    docker build -t mwdle/router_rebooter:latest .
+    ```  
+
+6. Create a file ```router_pass``` and ```extender_pass``` containing the gateway access passwords (not Wi-Fi passwords) of the respective devices.  
+7. Move the .jar and password files you created in steps 1 and 4 to a folder of your choosing, ensure the .jar files are marked as executable, and update the bind mounts in the Docker Compose file accordingly.  
+8. Modify the bind mount in the Docker Compose file for ```id_rsa.pub``` to use the public key of the device/container that initiates the SSH connection to RouterRebooter.  
+9. Create/start the container by executing:
+
+    ```shell
+    docker compose up -d
+    ```  
+
+10. To execute the rebooter in Docker:
+
+    ```shell
+    docker exec -it RouterRebooter bash
+    # then
+    /RouterRebooter/data/executeRebooter.sh router
+    # and/or
+    /RouterRebooter/data/executeRebooter.sh extender
+    ```
+
+11. If setting up access for Home Assistant, you must ```docker exec``` into the container, execute ```ssh root@router_rebooter```, then enter 'yes' to add RouterRebooter to the known hosts file.
+12. Anytime you remove the container and start it again, Home Assistant will not connect to RouterRebooter until you delete the ```known_hosts``` file in Home Assistant and repeat step 11.  
 
 ## Home Assistant Triggers & Sensors  
 
@@ -65,4 +127,12 @@ entities:
   - entity: script.extender_rebooter
   - entity: sensor.extenderstatus
 title: Rebooters
-```
+```  
+
+## License  
+
+This project is licensed under the GNU General Public License v3.0 (GPL-3.0). See the [LICENSE](LICENSE.txt) file for details.  
+
+## Disclaimer  
+
+This repository is provided as-is and is intended for informational and reference purposes only. The author assumes no responsibility for any errors or omissions in the content or for any consequences that may arise from the use of the information provided. Always exercise caution and seek professional advice if necessary.  
