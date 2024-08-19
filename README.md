@@ -38,19 +38,13 @@ A containerizable Selenide script to reboot an Arris SURFboard G54 WiFi router a
     git clone https://github.com/mwdle/RouterRebooter.git
     ```  
 
-2. Change the ```.env``` file properties:  
-
-    ```properties
-    DOCKER_VOLUMES=<PATH_TO_DOCKER_VOLUMES_FOLDER> # A folder on your system to store bind mounts for Docker containers.
-    ```  
-
-3. Execute the following command to create a Rebooter.jar file in the 'target' folder:  
+2. In the project directory, Execute the following command to create a Rebooter.jar file in the 'target' folder:  
 
     ```shell
     mvn package
     ```  
 
-4. If you do not wish to containerize the script, you may stop at this step and run the executable jar file using the following:
+3. If you do not wish to containerize the script, you may stop at this step and run the executable jar file using the following:
 
     ```shell
     export ROUTER_PASSWORD=<YOUR_ROUTER_PASSWORD>
@@ -66,22 +60,37 @@ A containerizable Selenide script to reboot an Arris SURFboard G54 WiFi router a
     java -jar Rebooter.jar extender
     ```  
 
-5. To build a docker image for the scripts, execute the following Docker build command from the RouterRebooter project folder:  
+4. Create a folder on your system for Docker bind mounts / storing container files. The folder should have the following structure:  
+
+    ```shell
+    docker_volumes/
+    ├── RouterRebooter/
+    │   ├── data/
+    │   └── secrets/
+    ```  
+
+5. Change the ```.env``` file properties for your configuration:  
+
+    ```properties
+    DOCKER_VOLUMES=<PATH_TO_DOCKER_VOLUMES_FOLDER> # The folder created in the previous step.
+    ```  
+
+6. To build a docker image for the scripts, execute the following Docker build command from the RouterRebooter project folder:  
 
     ```shell
     docker build -t mwdle/router_rebooter:latest .
     ```  
 
-6. Create a file ```router_pass``` and ```extender_pass``` containing the gateway access passwords (not Wi-Fi passwords) of the respective devices.  
-7. Move the .jar and password files you created in steps 1 and 4 to a folder of your choosing, ensure the .jar files are marked as executable, and update the bind mounts in the Docker Compose file accordingly.  
-8. Modify the bind mount in the Docker Compose file for ```id_rsa.pub``` to use the public key of the device/container that initiates the SSH connection to RouterRebooter.  
-9. Create/start the container by executing:
+7. Create a file ```router_pass``` and ```extender_pass``` containing the gateway access passwords (not Wi-Fi passwords) of the respective devices.  
+8. Move the .jar and password files you created in steps 1 and 4 to a folder of your choosing, ensure the .jar files are marked as executable, and update the bind mounts in the Docker Compose file accordingly.  
+9. Modify the bind mount in the Docker Compose file for ```id_rsa.pub``` to use the public key of the device/container that initiates the SSH connection to RouterRebooter.  
+10. Start the container by executing:
 
     ```shell
     docker compose up -d
     ```  
 
-10. To execute the rebooter in Docker:
+11. To execute the rebooter in Docker:
 
     ```shell
     docker exec -it RouterRebooter bash
@@ -91,8 +100,8 @@ A containerizable Selenide script to reboot an Arris SURFboard G54 WiFi router a
     /RouterRebooter/data/executeRebooter.sh extender
     ```
 
-11. If setting up access for Home Assistant, you must ```docker exec``` into the container, execute ```ssh root@router_rebooter```, then enter 'yes' to add RouterRebooter to the known hosts file.
-12. Anytime you remove the container and start it again, Home Assistant will not connect to RouterRebooter until you delete the ```known_hosts``` file in Home Assistant and repeat step 11.  
+12. If setting up access for Home Assistant, you must ```docker exec``` into the container, execute ```ssh root@router_rebooter```, then enter 'yes' to add RouterRebooter to the known hosts file.
+13. Anytime you remove the container and start it again, Home Assistant will not connect to RouterRebooter until you delete the ```known_hosts``` file in Home Assistant and repeat step 12.  
 
 ## Home Assistant Triggers & Sensors  
 
