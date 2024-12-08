@@ -6,6 +6,9 @@ services:
     hostname: routerrebooter
     networks:
       - RouterRebooter
+    build:
+      context: .
+      dockerfile: ./Dockerfile
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ${DOCKER_VOLUMES}/HomeAssistant/.ssh/id_rsa.pub:/root/.ssh/authorized_keys:ro

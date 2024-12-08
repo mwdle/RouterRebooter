@@ -78,7 +78,7 @@ A containerizable Selenide script to reboot an Arris SURFboard G54 WiFi router a
 6. To build a docker image for the scripts, execute the following Docker build command from the RouterRebooter project folder:  
 
     ```shell
-    docker build -t mwdle/router_rebooter:latest .
+    docker compose build
     ```  
 
 7. Create a file `router_pass` and `extender_pass` containing the gateway access passwords (not Wi-Fi passwords) of the respective devices.  
