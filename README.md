@@ -1,6 +1,10 @@
 # RouterRebooter  
 
-A containerizable Selenide script to reboot an Arris SURFboard G54 WiFi router and TP-Link RE650 extender  
+A containerizable Selenide script to reboot an Arris SURFboard G54 WiFi router and TP-Link RE650 extender
+
+## Notice
+
+The way this project is structured and integrates with Home Assistant is suboptimal, overengineered, and stands merely as an example. A better solution is to configure the `selenium/standalone-chrome` image as a sibling container to Home Assistant, and use Pyscript within HA to install Selenium and run scripts to reboot your router from there. See [HomeAssistantConfig](https://github.com/mwdle/HomeAssistantConfig) as an example, particularly the `pyscript*` directories, how they are mounted within compose.yaml, and the Pyscript setup within `configuration.yaml`.
 
 ## Table of Contents  
 
